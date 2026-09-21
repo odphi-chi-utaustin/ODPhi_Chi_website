@@ -27,7 +27,7 @@ export async function getChargesForMember(memberId: string): Promise<Charge[]> {
 
 export function balanceOf(charges: Pick<Charge, "amount_cents" | "paid_at">[]) {
   return charges
-    .filter((c) => c.paid_at === null)
+    .filter((c) => !c.paid_at)
     .reduce((sum, c) => sum + c.amount_cents, 0);
 }
 

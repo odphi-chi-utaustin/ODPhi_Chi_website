@@ -19,9 +19,9 @@ export default async function PortalPage({
   ]);
   const charges = await getChargesForMember(member.id);
   const balance = balanceOf(charges);
-  const owed = charges.filter((c) => c.paid_at === null && c.pending_at === null);
-  const pending = charges.filter((c) => c.paid_at === null && c.pending_at !== null);
-  const paid = charges.filter((c) => c.paid_at !== null);
+  const owed = charges.filter((c) => !c.paid_at && !c.pending_at);
+  const pending = charges.filter((c) => !c.paid_at && !!c.pending_at);
+  const paid = charges.filter((c) => !!c.paid_at);
   const stripeEnabled = Boolean(process.env.STRIPE_SECRET_KEY);
 
   return (

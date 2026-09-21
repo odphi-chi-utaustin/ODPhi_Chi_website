@@ -21,8 +21,8 @@ export default async function ExecPage() {
   const [roster, charges] = await Promise.all([getRosterWithBalances(), getAllCharges()]);
   const actives = roster.filter((m) => m.active);
   const totalOwed = roster.reduce((s, m) => s + m.balance_cents, 0);
-  const outstanding = charges.filter((c) => c.paid_at === null);
-  const settled = charges.filter((c) => c.paid_at !== null).slice(0, 25);
+  const outstanding = charges.filter((c) => !c.paid_at);
+  const settled = charges.filter((c) => !!c.paid_at).slice(0, 25);
 
   return (
     <div className="flex flex-col gap-10">
