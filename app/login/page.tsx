@@ -18,7 +18,7 @@ export default async function LoginPage({
       </p>
       {error === "expired" && (
         <p className="mt-4 text-sm text-scarlet">
-          That link expired or was already used. Request a new one.
+          That link expired, was already used, or was opened on a different device than the one that requested it. Request a new one below and open it here.
         </p>
       )}
       <Card className="mt-6">

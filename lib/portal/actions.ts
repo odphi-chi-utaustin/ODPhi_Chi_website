@@ -149,16 +149,18 @@ export async function addMember(
     return { error: error.code === "23505" ? "That email is already on the roster." : error.message };
   }
 
-  // Creates the auth.users row and emails an invite; the only path that grants a login.
-  const { error: inviteErr } = await admin.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `${await siteUrl()}/auth/callback`,
+  // Creates the auth.users row so the member can request a magic link from /login.
+  // No invite email: editing Supabase's templates requires custom SMTP.
+  const { error: authErr } = await admin.auth.admin.createUser({
+    email,
+    email_confirm: true,
   });
-  if (inviteErr && !/already been registered/i.test(inviteErr.message)) {
-    return { error: `Added to roster, but invite failed: ${inviteErr.message}` };
+  if (authErr && !/already been registered|already exists/i.test(authErr.message)) {
+    return { error: `Added to roster, but login setup failed: ${authErr.message}` };
   }
 
   revalidatePath("/portal", "layout");
-  return { success: `${name} added and invited.` };
+  return { success: `${name} added. Tell them to sign in at /login.` };
 }
 
 export async function setMemberActive(formData: FormData) {

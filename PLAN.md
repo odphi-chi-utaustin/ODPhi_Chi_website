@@ -60,7 +60,9 @@ the $300 charge and creates a $150 one. If this bites, that's the signal to add 
 
 Supabase magic link with `signInWithOtp({ shouldCreateUser: false })`. Only emails that already have
 an `auth.users` row get a link. Exec adds a member by inserting into `members` **and** calling
-`auth.admin.inviteUserByEmail` from a server action — that's the only path that creates a login.
+`auth.admin.createUser({ email_confirm: true })` from a server action — the only path that creates
+a login. No invite email (Supabase templates need custom SMTP); members request their own link,
+which must be opened on the device that requested it (PKCE).
 
 ---
 
@@ -93,7 +95,7 @@ Server actions: `sendMagicLink`, `signOut`, `addCharge`, `chargeAllActives`, `ma
 ## 6. Build order
 
 1. **Supabase + schema** — `supabase/schema.sql` (tables, RLS on), `supabase/seed.sql` template,
-   env vars. *(Manual: create the project, run the SQL, invite the roster.)*
+   env vars. *(Manual: create the project, run the SQL, create your own auth user.)*
 2. **Auth + member view** — `/login`, callback, `proxy.ts`, `/portal`. Fixes the dead Login button
    in the nav. Shippable on its own if exec seeds charges in the Supabase dashboard.
 3. **Exec view** — `/portal/exec`.

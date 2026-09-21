@@ -5,12 +5,13 @@
 2. **SQL Editor** → run `schema.sql`, then `seed.sql` (edit the roster first).
 3. **Authentication → URL Configuration**: set Site URL to the production URL and add
    `http://localhost:3000/auth/callback` and `https://<prod>/auth/callback` to Redirect URLs.
-4. **Authentication → Email Templates**: change the link in *Magic Link* and *Invite user* to the
-   token-hash form so it works server-side and from any browser:
+4. **Authentication → Users → Add user → Create new user**: enter your email (the exec row in
+   `seed.sql`), tick **Auto Confirm User**, and set any password (it's never used). Don't use
+   "Send invitation" — editing invite/magic-link templates requires custom SMTP, so the app skips
+   invite emails entirely.
+5. Go to `/login`, request a link, open it **on the same device**. After that, add everyone else
+   through the "Add member" form on `/portal/exec`, which creates the roster row and the login in
+   one step; they then sign themselves in at `/login`.
 
-   - Magic Link: `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=magiclink`
-   - Invite user: `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=invite`
-
-5. **Authentication → Users → Invite user** for yourself (the exec row in `seed.sql`). After that,
-   add everyone else through the "Add member" form on `/portal/exec`, which inserts the roster row
-   and sends the invite in one step.
+Sign-in links must be opened on the device that requested them (PKCE). The login page says so if a
+link fails.
