@@ -3,8 +3,8 @@ import { requireMember } from "@/lib/portal/auth";
 import { getChargesForMember, balanceOf } from "@/lib/portal/queries";
 import { formatCents, formatDate } from "@/lib/portal/format";
 import { paymentInstructions } from "@/lib/portal/config";
-import { startCheckout } from "@/lib/portal/payments";
-import { Button } from "@/components/ui/Button";
+import { PayButtons } from "@/components/portal/PayButtons";
+import { passFeesToPayer } from "@/lib/portal/config";
 
 export const metadata = { title: "My Dues | Chi Chapter" };
 
@@ -32,6 +32,12 @@ export default async function PortalPage({
           transfers show as “processing” for a few business days.
         </Card>
       )}
+      {stripeEnabled && passFeesToPayer && owed.length > 0 && (
+        <p className="-mt-4 text-xs text-muted-light">
+          Online payments add the processor&apos;s fee so the chapter receives the full amount.
+          Bank transfer is the cheaper option. Venmo and Zelle have no fee.
+        </p>
+      )}
       {canceled && (
         <p className="text-sm text-muted-light">Checkout canceled. Nothing was charged.</p>
       )}
@@ -42,9 +48,10 @@ export default async function PortalPage({
           <p className="text-display mt-1">{formatCents(balance)}</p>
         </div>
         {stripeEnabled && owed.length > 1 && (
-          <form action={startCheckout}>
-            <Button type="submit">Pay all {formatCents(balanceOf(owed))}</Button>
-          </form>
+          <div className="flex flex-col items-end gap-1">
+            <p className="text-xs uppercase tracking-wider text-muted-light">Pay all {formatCents(balanceOf(owed))}</p>
+            <PayButtons amountCents={balanceOf(owed)} size="lg" />
+          </div>
         )}
       </div>
 
@@ -62,14 +69,7 @@ export default async function PortalPage({
                 </div>
                 <div className="flex items-center gap-4">
                   <p className="text-sm font-medium">{formatCents(c.amount_cents)}</p>
-                  {stripeEnabled && (
-                    <form action={startCheckout}>
-                      <input type="hidden" name="charge_id" value={c.id} />
-                      <button type="submit" className="text-sm font-semibold text-scarlet hover:underline">
-                        Pay
-                      </button>
-                    </form>
-                  )}
+                  {stripeEnabled && <PayButtons amountCents={c.amount_cents} chargeId={c.id} />}
                 </div>
               </div>
             ))}

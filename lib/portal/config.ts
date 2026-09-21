@@ -1,4 +1,7 @@
 // Shown to members on /portal. Update when the treasurer changes.
+// When true, online payments add a processing-fee line so the chapter nets the full amount.
+export const passFeesToPayer = true;
+
 export const paymentInstructions = {
   venmo: "@odphi-chi",
   zelle: "treasurer@example.com",
