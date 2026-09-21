@@ -40,7 +40,7 @@ export default function AboutPage() {
             at the University of Texas at Austin in 1998. Since then, the
             chapter has grown into one of the most active multicultural
             fraternities on campus, rooted in the founding pillars of
-            brotherhood, leadership, scholarship, and service.
+            unity, honesty, integrity, and leadership.
           </p>
         </Section>
 

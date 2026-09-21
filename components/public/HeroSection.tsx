@@ -27,7 +27,7 @@ export function HeroSection() {
         </h1>
         <p className="text-body mt-6 max-w-xl text-white/80">
           The Chi Chapter at The University of Texas at Austin — leaders built
-          through scholarship, service, and unity.
+          on unity, honesty, integrity, and leadership.
         </p>
         <div className="mt-8 flex flex-wrap gap-4">
           <Button href="/membership" variant="primary">

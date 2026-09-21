@@ -16,20 +16,20 @@ const stats = [
 
 const pillars = [
   {
-    name: "Brotherhood",
-    text: "A bond across every culture and background that outlasts campus.",
+    name: "Unity",
+    text: "One culture, any race — a brotherhood across every background that outlasts campus.",
+  },
+  {
+    name: "Honesty",
+    text: "Straight with each other, in the chapter and out of it.",
+  },
+  {
+    name: "Integrity",
+    text: "Doing the right thing when no one is watching, and holding each other to it.",
   },
   {
     name: "Leadership",
     text: "Brothers who step up in the chapter, on campus, and in their careers.",
-  },
-  {
-    name: "Scholarship",
-    text: "A GPA standard, study halls, and mentorship every semester.",
-  },
-  {
-    name: "Service",
-    text: "Hundreds of hours a year with partners across Austin.",
   },
 ];
 
