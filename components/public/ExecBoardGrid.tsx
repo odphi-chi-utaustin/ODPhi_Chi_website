@@ -9,7 +9,7 @@ type ExecBoardGridProps = {
 
 export function ExecBoardGrid({ members, variant = "dark" }: ExecBoardGridProps) {
   return (
-    <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-6 md:grid-cols-3">
       {members.map((member) => (
         <div key={member.id} className="flex flex-col gap-3">
           <PhotoFrame
@@ -17,7 +17,8 @@ export function ExecBoardGrid({ members, variant = "dark" }: ExecBoardGridProps)
             alt={`${member.name}, ${member.title}`}
             label="Portrait"
             className="aspect-[4/5] w-full"
-            sizes="(min-width: 768px) 25vw, 50vw"
+            position="center 78%"
+            sizes="(min-width: 768px) 33vw, 50vw"
           />
           <p className="font-serif text-[22px] leading-tight">{member.name}</p>
           <p

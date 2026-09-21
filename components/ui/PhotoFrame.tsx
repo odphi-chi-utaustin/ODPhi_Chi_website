@@ -8,6 +8,7 @@ type PhotoFrameProps = {
   className?: string;
   sizes?: string;
   priority?: boolean;
+  position?: string; // CSS object-position, e.g. "center 30%"
 };
 
 // Renders the photo when we have one, otherwise a labelled stand-in so the
@@ -19,6 +20,7 @@ export function PhotoFrame({
   className,
   sizes = "100vw",
   priority,
+  position,
 }: PhotoFrameProps) {
   if (src) {
     return (
@@ -30,6 +32,7 @@ export function PhotoFrame({
           sizes={sizes}
           priority={priority}
           className="object-cover"
+          style={position ? { objectPosition: position } : undefined}
         />
       </div>
     );

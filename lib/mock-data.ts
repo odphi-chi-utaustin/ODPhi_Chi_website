@@ -6,10 +6,12 @@ export type MockExecMember = {
 };
 
 export const mockExecBoard: MockExecMember[] = [
-  { id: "1", name: "Carlos Rojas", title: "President" },
-  { id: "2", name: "Carlos Rojas", title: "Vice President" },
-  { id: "3", name: "Carlos Rojas", title: "Treasurer" },
-  { id: "4", name: "Carlos Rojas", title: "Secretary" },
+  { id: "1", name: "Fernando Gonzalez", title: "President", photoUrl: "/photos/exec/fernando-gonzalez.jpg" },
+  { id: "2", name: "Angel Pina", title: "Vice President", photoUrl: "/photos/exec/angel-pina.jpg" },
+  { id: "3", name: "Sergio Jimenez", title: "Treasurer", photoUrl: "/photos/exec/sergio-jimenez.jpg" },
+  { id: "4", name: "Fernando Nunez", title: "Sergeant-at-Arms", photoUrl: "/photos/exec/fernando-nunez.jpg" },
+  { id: "5", name: "Erick Torres", title: "Rush Chair", photoUrl: "/photos/exec/erick-torres.jpg" },
+  { id: "6", name: "Rafael Medina", title: "Potential Member Educator", photoUrl: "/photos/exec/rafael-medina.jpg" },
 ];
 
 export type MockCommittee = {

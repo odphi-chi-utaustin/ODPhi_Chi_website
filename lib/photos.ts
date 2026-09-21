@@ -1,7 +1,7 @@
-// Chapter photography. Drop files into public/photos and point at them here;
-// a null renders a labelled placeholder until the real photo exists.
+// Chapter photography. Web-sized copies live in public/photos; originals in photos-src (gitignored).
+// Set a value to null to fall back to a labelled placeholder.
 export const photos = {
-  hero: null as string | null, // wide, landscape — brothers on the Main Mall
-  about: null as string | null, // portrait or square — founding class / crest
-  rush: null as string | null, // wide — rush event
+  hero: "/photos/hero.jpg" as string | null, // full chapter on stage, landscape
+  about: "/photos/exec-board.jpg" as string | null, // exec board in suits, portrait
+  rush: null as string | null,
 };

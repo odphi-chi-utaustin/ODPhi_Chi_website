@@ -42,3 +42,6 @@ next-env.d.ts
 
 # keep the example env committed
 !.env.example
+
+# original photography (web copies live in public/photos)
+/photos-src

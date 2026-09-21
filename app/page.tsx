@@ -74,10 +74,11 @@ export default function HomePage() {
           <div className="relative">
             <PhotoFrame
               src={photos.about}
-              alt="Founding class of the Chi Chapter"
-              label="Photo — founding class or crest"
-              className="aspect-[4/3] w-full md:h-[440px]"
+              alt="The 2026–27 executive board of the Chi Chapter"
+              label="Photo — executive board"
+              className="aspect-[4/5] w-full md:h-[560px]"
               sizes="(min-width: 768px) 50vw, 100vw"
+              position="center 60%"
             />
             <div
               aria-hidden="true"

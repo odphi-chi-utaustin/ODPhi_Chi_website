@@ -11,6 +11,7 @@ export function HeroSection() {
           alt="Brothers of the Chi Chapter on the UT Austin Main Mall"
           label="Chapter photo — brothers on the Main Mall"
           className="h-full w-full"
+          position="center 35%"
           priority
         />
       </div>
