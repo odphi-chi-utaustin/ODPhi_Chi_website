@@ -15,3 +15,25 @@
 
 Sign-in links must be opened on the device that requested them (PKCE). The login page says so if a
 link fails.
+
+# Stripe setup (one-time, after the chapter account exists)
+
+1. Run `002_stripe.sql` in the SQL editor.
+2. **Stripe → Settings → Payment methods**: turn on **ACH Direct Debit** (0.8% capped at $5) so it's
+   offered next to cards (2.9% + 30¢).
+3. **Developers → API keys**: copy the **Secret key** into `STRIPE_SECRET_KEY` (Vercel: secret;
+   `.env.local` for dev). Use the test-mode key until the bank account is verified.
+4. **Developers → Webhooks → Add endpoint**: URL `https://<vercel-url>/api/stripe/webhook`. Select
+   these events:
+   - `checkout.session.completed`
+   - `checkout.session.async_payment_succeeded`
+   - `checkout.session.async_payment_failed`
+   - `checkout.session.expired`
+   - `charge.refunded`
+
+   Copy the endpoint's **Signing secret** into `STRIPE_WEBHOOK_SECRET`. Redeploy.
+5. Local dev: `stripe listen --forward-to localhost:3000/api/stripe/webhook` prints a `whsec_…` for
+   `.env.local`. Test card `4242 4242 4242 4242`; test ACH uses Stripe's test bank in Checkout.
+
+The Pay buttons only render when `STRIPE_SECRET_KEY` is set, so the portal works without Stripe.
+Exec still marks Venmo/Zelle payments by hand; Stripe is just another way `paid_at` gets set.

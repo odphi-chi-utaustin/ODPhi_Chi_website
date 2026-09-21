@@ -7,6 +7,8 @@ export type Charge = {
   amount_cents: number;
   description: string;
   paid_at: string | null;
+  pending_at: string | null;
+  stripe_session_id: string | null;
   created_at: string;
 };
 

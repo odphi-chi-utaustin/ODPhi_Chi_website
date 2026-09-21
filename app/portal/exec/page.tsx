@@ -77,7 +77,10 @@ export default async function ExecPage() {
                   <p className="text-sm font-medium">
                     {c.member_name} <span className="text-muted-light">·</span> {c.description}
                   </p>
-                  <p className="text-xs text-muted-light">Added {formatDate(c.created_at)}</p>
+                  <p className="text-xs text-muted-light">
+                    Added {formatDate(c.created_at)}
+                    {c.pending_at && " · bank transfer processing"}
+                  </p>
                 </div>
                 <div className="flex items-center gap-4 text-sm">
                   <span className="font-medium">{formatCents(c.amount_cents)}</span>
@@ -157,7 +160,7 @@ export default async function ExecPage() {
               <div key={c.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-muted-light">
                 <div>
                   <p className="text-sm">{c.member_name} · {c.description}</p>
-                  <p className="text-xs">Paid {formatDate(c.paid_at!)}</p>
+                  <p className="text-xs">Paid {formatDate(c.paid_at!)}{c.stripe_session_id && " · Stripe"}</p>
                 </div>
                 <div className="flex items-center gap-4 text-sm">
                   <span>{formatCents(c.amount_cents)}</span>
