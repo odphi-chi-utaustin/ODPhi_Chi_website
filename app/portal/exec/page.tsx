@@ -12,12 +12,13 @@ import {
   deleteCharge,
   addMember,
   setMemberActive,
+  setMemberRole,
 } from "@/lib/portal/actions";
 
 export const metadata = { title: "Exec | Chi Chapter" };
 
 export default async function ExecPage() {
-  await requireExec();
+  const me = await requireExec();
   const [roster, charges] = await Promise.all([getRosterWithBalances(), getAllCharges()]);
   const actives = roster.filter((m) => m.active);
   const totalOwed = roster.reduce((s, m) => s + m.balance_cents, 0);
@@ -118,6 +119,15 @@ export default async function ExecPage() {
                 <span className={m.balance_cents > 0 ? "font-medium" : "text-muted-light"}>
                   {formatCents(m.balance_cents)}
                 </span>
+                {m.id !== me.id && (
+                  <form action={setMemberRole}>
+                    <input type="hidden" name="id" value={m.id} />
+                    <input type="hidden" name="role" value={m.role === "exec" ? "member" : "exec"} />
+                    <button type="submit" className="text-muted-light hover:text-scarlet">
+                      {m.role === "exec" ? "Remove exec" : "Make exec"}
+                    </button>
+                  </form>
+                )}
                 <form action={setMemberActive}>
                   <input type="hidden" name="id" value={m.id} />
                   <input type="hidden" name="active" value={m.active ? "false" : "true"} />

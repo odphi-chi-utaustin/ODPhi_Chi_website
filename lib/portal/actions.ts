@@ -186,6 +186,18 @@ export async function addMember(
   return { success: `${name} added. Tell them to sign in at /login.` };
 }
 
+// Promote to exec or demote to member. An exec can't demote themselves, so the
+// chapter can never end up with zero execs by accident.
+export async function setMemberRole(formData: FormData) {
+  const me = await requireExec();
+  const id = str(formData, "id");
+  const role = str(formData, "role") === "exec" ? "exec" : "member";
+  if (id === me.id && role !== "exec") return;
+  const admin = createSupabaseAdminClient();
+  await admin.from("members").update({ role }).eq("id", id);
+  revalidatePath("/portal", "layout");
+}
+
 export async function setMemberActive(formData: FormData) {
   await requireExec();
   const id = str(formData, "id");
