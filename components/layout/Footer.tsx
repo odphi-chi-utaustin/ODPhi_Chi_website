@@ -9,7 +9,7 @@ const links = [
 
 const socials = [
   { href: "https://www.instagram.com", label: "Instagram" },
-  { href: "https://www.linkedin.com", label: "LinkedIn" },
+  { href: "https://www.linkedin.com/company/omega-delta-phi-fraternity-inc-/", label: "LinkedIn" },
 ];
 
 export function Footer() {
