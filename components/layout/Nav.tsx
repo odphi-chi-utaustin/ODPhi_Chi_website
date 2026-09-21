@@ -15,8 +15,8 @@ export function Nav() {
           <span className="font-serif text-[26px] font-semibold tracking-[0.04em] text-ink">
             ΩΔΦ
           </span>
-          <span className="hidden text-[13px] uppercase tracking-[0.18em] text-muted-light sm:inline">
-            Chi Chapter · Austin
+          <span className="text-[11px] uppercase tracking-[0.16em] text-muted-light sm:text-[13px] sm:tracking-[0.18em]">
+            Chi Chapter<span className="hidden sm:inline"> · Austin</span>
           </span>
         </Link>
 
