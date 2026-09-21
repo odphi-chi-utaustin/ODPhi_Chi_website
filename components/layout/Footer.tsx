@@ -8,7 +8,7 @@ const links = [
 ];
 
 const socials = [
-  { href: "https://www.instagram.com", label: "Instagram" },
+  { href: "https://www.instagram.com/texasodphi/", label: "Instagram" },
   { href: "https://www.linkedin.com/company/omega-delta-phi-fraternity-inc-/", label: "LinkedIn" },
 ];
 
