@@ -7,7 +7,7 @@ create table members (
   id          uuid primary key default gen_random_uuid(),
   email       citext not null unique,
   name        text not null,
-  role        text not null default 'member' check (role in ('member', 'exec')),
+  role        text not null default 'member' check (role in ('member', 'exec', 'admin')),
   active      boolean not null default true,
   created_at  timestamptz not null default now()
 );

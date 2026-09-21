@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { requireExec } from "@/lib/portal/auth";
+import { requireExec, requireAdmin, type Member } from "@/lib/portal/auth";
 import { parseDollars } from "@/lib/portal/format";
 import { newChargeEmail, sendEmails } from "@/lib/portal/email";
 
@@ -13,6 +13,14 @@ export type ActionState = { error?: string; success?: string } | undefined;
 
 function str(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
+}
+
+// Parses a role from a form, capped by what the caller is allowed to grant:
+// only admins can grant admin.
+function roleFrom(formData: FormData, by: Member): Member["role"] {
+  const r = str(formData, "role");
+  if (r === "admin") return by.role === "admin" ? "admin" : "exec";
+  return r === "exec" ? "exec" : "member";
 }
 
 async function siteUrl() {
@@ -159,10 +167,10 @@ export async function addMember(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireExec();
+  const me = await requireExec();
   const email = str(formData, "email").toLowerCase();
   const name = str(formData, "name");
-  const role = str(formData, "role") === "exec" ? "exec" : "member";
+  const role = roleFrom(formData, me);
   if (!email.includes("@")) return { error: "Enter a valid email." };
   if (!name) return { error: "Enter a name." };
 
@@ -186,15 +194,40 @@ export async function addMember(
   return { success: `${name} added. Tell them to sign in at /login.` };
 }
 
-// Promote to exec or demote to member. An exec can't demote themselves, so the
-// chapter can never end up with zero execs by accident.
+// Change a member's role. Nobody can change their own role, admins can only be
+// changed by admins, and only admins can grant admin.
 export async function setMemberRole(formData: FormData) {
   const me = await requireExec();
   const id = str(formData, "id");
-  const role = str(formData, "role") === "exec" ? "exec" : "member";
-  if (id === me.id && role !== "exec") return;
+  if (id === me.id) return;
+  const role = roleFrom(formData, me);
+
   const admin = createSupabaseAdminClient();
+  const { data: target } = await admin.from("members").select("role").eq("id", id).maybeSingle();
+  if (!target) return;
+  if (target.role === "admin" && me.role !== "admin") return;
+
   await admin.from("members").update({ role }).eq("id", id);
+  revalidatePath("/portal", "layout");
+}
+
+// Admin only. Deletes the roster row (charges cascade) and the login, so the
+// address can no longer request a magic link. Not reversible.
+export async function removeMember(formData: FormData) {
+  const me = await requireAdmin();
+  const id = str(formData, "id");
+  if (!id || id === me.id) return;
+
+  const admin = createSupabaseAdminClient();
+  const { data: target } = await admin.from("members").select("email").eq("id", id).maybeSingle();
+  if (!target) return;
+
+  await admin.from("members").delete().eq("id", id);
+
+  const { data: users } = await admin.auth.admin.listUsers({ perPage: 1000 });
+  const authUser = users?.users.find((u) => u.email?.toLowerCase() === target.email.toLowerCase());
+  if (authUser) await admin.auth.admin.deleteUser(authUser.id);
+
   revalidatePath("/portal", "layout");
 }
 

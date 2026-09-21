@@ -48,7 +48,7 @@ Two tables. A member's balance is the sum of his charges that have no `paid_at`.
 | `id` | uuid | primary key |
 | `email` | citext, unique | the login gate; matched case-insensitively against the Supabase auth user |
 | `name` | text | |
-| `role` | text | `member` or `exec` |
+| `role` | text | `member`, `exec`, or `admin` (admin = exec + remove members + grant admin) |
 | `active` | bool | `false` = inactive/alumni; excluded from bulk dues |
 | `created_at` | timestamptz | |
 
@@ -113,7 +113,7 @@ doesn't come through it.
 | Postgres RLS | Enabled on `members` and `charges` with **zero policies** | The public anon key can't read or write a single row, even if someone extracts it from the browser bundle |
 | Service role key | Used for every query, from server code only | Bypasses RLS, so it must never reach the browser. It lives in `SUPABASE_SERVICE_ROLE_KEY` (no `NEXT_PUBLIC_` prefix) and is imported only by `lib/supabase/admin.ts` |
 | `requireMember()` | First line of every portal page and action; redirects to `/login` if no roster row matches | Members can only ever see queries scoped to their own `member.id` |
-| `requireExec()` | First line of every exec page and mutating action; redirects to `/portal` if `role != 'exec'` | A member can't call an exec server action by guessing its name; the check runs server-side inside the action |
+| `requireExec()` | First line of every exec page and mutating action; redirects to `/portal` unless role is `exec` or `admin` | A member can't call an exec server action by guessing its name; the check runs server-side inside the action |
 | `proxy.ts` | Redirects logged-out users away from `/portal` before the page renders | Convenience and cookie refresh only; it is **not** the security boundary |
 
 Things a member cannot do, by construction: write to `charges`, see anyone else's charges, change
@@ -146,6 +146,8 @@ browser, and each one starts with `requireExec()` (or nothing extra, for the two
 | `deleteCharge` | exec | Deletes the row |
 | `addMember` | exec | Inserts roster row, creates the Supabase login |
 | `setMemberActive` | exec | Toggles `active` |
+| `setMemberRole` | exec | Changes a member's role; only admins can touch admins or grant admin |
+| `removeMember` | admin | Deletes the roster row, its charges, and the login |
 
 After any mutation the action calls `revalidatePath('/portal', 'layout')` so both portal pages
 re-render with fresh data on the next request.

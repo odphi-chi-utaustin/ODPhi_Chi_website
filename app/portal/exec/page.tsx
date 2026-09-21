@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { ActionForm, inputClass, labelClass } from "@/components/portal/ActionForm";
+import { ConfirmForm } from "@/components/portal/ConfirmForm";
 import { requireExec } from "@/lib/portal/auth";
 import { getRosterWithBalances, getAllCharges } from "@/lib/portal/queries";
 import { formatCents, formatDate } from "@/lib/portal/format";
@@ -13,12 +14,14 @@ import {
   addMember,
   setMemberActive,
   setMemberRole,
+  removeMember,
 } from "@/lib/portal/actions";
 
 export const metadata = { title: "Exec | Chi Chapter" };
 
 export default async function ExecPage() {
   const me = await requireExec();
+  const isAdmin = me.role === "admin";
   const [roster, charges] = await Promise.all([getRosterWithBalances(), getAllCharges()]);
   const actives = roster.filter((m) => m.active);
   const totalOwed = roster.reduce((s, m) => s + m.balance_cents, 0);
@@ -112,6 +115,7 @@ export default async function ExecPage() {
                   <p className="text-xs text-muted-light">{m.email}</p>
                 </div>
                 {m.role === "exec" && <Badge variant="exec">Exec</Badge>}
+                {m.role === "admin" && <Badge variant="exec">Admin</Badge>}
                 {!m.active && <Badge variant="alumni">Inactive</Badge>}
                 {!m.last_sign_in_at && <Badge variant="active-light">Never signed in</Badge>}
               </div>
@@ -119,13 +123,15 @@ export default async function ExecPage() {
                 <span className={m.balance_cents > 0 ? "font-medium" : "text-muted-light"}>
                   {formatCents(m.balance_cents)}
                 </span>
-                {m.id !== me.id && (
-                  <form action={setMemberRole}>
+                {m.id !== me.id && (isAdmin || m.role !== "admin") && (
+                  <form action={setMemberRole} className="flex items-center gap-1">
                     <input type="hidden" name="id" value={m.id} />
-                    <input type="hidden" name="role" value={m.role === "exec" ? "member" : "exec"} />
-                    <button type="submit" className="text-muted-light hover:text-scarlet">
-                      {m.role === "exec" ? "Remove exec" : "Make exec"}
-                    </button>
+                    <select name="role" defaultValue={m.role} className="h-8 border border-border-light bg-white px-2 text-xs">
+                      <option value="member">Member</option>
+                      <option value="exec">Exec</option>
+                      {isAdmin && <option value="admin">Admin</option>}
+                    </select>
+                    <button type="submit" className="text-muted-light hover:text-scarlet">Set role</button>
                   </form>
                 )}
                 <form action={setMemberActive}>
@@ -135,6 +141,15 @@ export default async function ExecPage() {
                     {m.active ? "Deactivate" : "Reactivate"}
                   </button>
                 </form>
+                {isAdmin && m.id !== me.id && (
+                  <ConfirmForm
+                    action={removeMember}
+                    message={`Remove ${m.name} from the roster? This deletes their charges and login. It can't be undone.`}
+                  >
+                    <input type="hidden" name="id" value={m.id} />
+                    <button type="submit" className="text-muted-light hover:text-scarlet">Remove</button>
+                  </ConfirmForm>
+                )}
               </div>
             </div>
           ))}
@@ -157,6 +172,7 @@ export default async function ExecPage() {
                 <select name="role" defaultValue="member" className={inputClass}>
                   <option value="member">Member</option>
                   <option value="exec">Exec</option>
+                  {isAdmin && <option value="admin">Admin</option>}
                 </select>
               </div>
             </div>

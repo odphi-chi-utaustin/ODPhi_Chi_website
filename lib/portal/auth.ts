@@ -7,7 +7,7 @@ export type Member = {
   id: string;
   email: string;
   name: string;
-  role: "member" | "exec";
+  role: "member" | "exec" | "admin";
   active: boolean;
 };
 
@@ -36,8 +36,20 @@ export async function requireMember(): Promise<Member> {
   return member;
 }
 
+export function isExec(member: Member) {
+  return member.role === "exec" || member.role === "admin";
+}
+
+// Exec or admin.
 export async function requireExec(): Promise<Member> {
   const member = await requireMember();
-  if (member.role !== "exec") redirect("/portal");
+  if (!isExec(member)) redirect("/portal");
+  return member;
+}
+
+// Admin only: removing members, granting/revoking admin.
+export async function requireAdmin(): Promise<Member> {
+  const member = await requireMember();
+  if (member.role !== "admin") redirect("/portal/exec");
   return member;
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireMember } from "@/lib/portal/auth";
+import { requireMember, isExec } from "@/lib/portal/auth";
 import { signOut } from "@/lib/portal/actions";
 
 export default async function PortalLayout({
@@ -16,7 +16,7 @@ export default async function PortalLayout({
           <Link href="/portal" className="font-medium hover:text-scarlet">
             My Dues
           </Link>
-          {member.role === "exec" && (
+          {isExec(member) && (
             <Link href="/portal/exec" className="font-medium hover:text-scarlet">
               Exec
             </Link>
