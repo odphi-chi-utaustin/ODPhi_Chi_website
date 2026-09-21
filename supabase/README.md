@@ -37,3 +37,18 @@ link fails.
 
 The Pay buttons only render when `STRIPE_SECRET_KEY` is set, so the portal works without Stripe.
 Exec still marks Venmo/Zelle payments by hand; Stripe is just another way `paid_at` gets set.
+
+# Email notifications (optional)
+
+Members get an email when a charge is added, and a reminder every Monday while they owe anything.
+Nothing sends until `RESEND_API_KEY` is set.
+
+1. Create a free account at resend.com → **API Keys** → copy into `RESEND_API_KEY` (Vercel: secret).
+2. Without a verified domain, Resend only delivers to the account owner's own email — fine for
+   testing. For the roster, **Domains → Add domain**, add the DNS records it shows, then set
+   `emailFrom` in `lib/portal/config.ts` to an address on that domain (e.g. `dues@<domain>`).
+3. Set `CRON_SECRET` in Vercel to any long random string. Vercel's cron (see `vercel.json`) sends it
+   as a Bearer token; the route rejects anything else. Hobby plan crons run once a day at most, so
+   the weekly schedule is fine.
+4. To test the reminder by hand:
+   `curl -H "Authorization: Bearer $CRON_SECRET" https://<vercel-url>/api/cron/reminders`

@@ -7,6 +7,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { requireExec } from "@/lib/portal/auth";
 import { parseDollars } from "@/lib/portal/format";
+import { newChargeEmail, sendEmails } from "@/lib/portal/email";
 
 export type ActionState = { error?: string; success?: string } | undefined;
 
@@ -19,6 +20,26 @@ async function siteUrl() {
   const host = h.get("x-forwarded-host") ?? h.get("host");
   const proto = h.get("x-forwarded-proto") ?? "http";
   return `${proto}://${host}`;
+}
+
+// Emails each member their new charge(s) and current balance. Best effort.
+async function notifyNewCharges(
+  memberIds: string[],
+  charge: { description: string; amount_cents: number },
+) {
+  if (!process.env.RESEND_API_KEY) return;
+  const admin = createSupabaseAdminClient();
+  const [membersRes, owedRes] = await Promise.all([
+    admin.from("members").select("id, name, email").in("id", memberIds),
+    admin.from("charges").select("member_id, amount_cents").in("member_id", memberIds).is("paid_at", null),
+  ]);
+  if (membersRes.error || owedRes.error) return;
+  const balance = new Map<string, number>();
+  for (const c of owedRes.data) balance.set(c.member_id, (balance.get(c.member_id) ?? 0) + c.amount_cents);
+  const portalUrl = `${await siteUrl()}/portal`;
+  await sendEmails(
+    membersRes.data.map((m) => newChargeEmail(m, [charge], balance.get(m.id) ?? 0, portalUrl)),
+  );
 }
 
 // ---- auth ----
@@ -72,6 +93,7 @@ export async function addCharge(
     .insert({ member_id, description, amount_cents });
   if (error) return { error: error.message };
 
+  await notifyNewCharges([member_id], { description, amount_cents });
   revalidatePath("/portal", "layout");
   return { success: "Charge added." };
 }
@@ -99,6 +121,7 @@ export async function chargeAllActives(
   );
   if (error) return { error: error.message };
 
+  await notifyNewCharges(actives.map((m) => m.id), { description, amount_cents });
   revalidatePath("/portal", "layout");
   return { success: `Charged ${actives.length} active member${actives.length === 1 ? "" : "s"}.` };
 }

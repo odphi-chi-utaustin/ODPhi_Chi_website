@@ -12,7 +12,10 @@ export type Charge = {
   created_at: string;
 };
 
-export type MemberWithBalance = Member & { balance_cents: number };
+export type MemberWithBalance = Member & {
+  balance_cents: number;
+  last_sign_in_at: string | null; // null = has never completed a magic-link sign-in
+};
 
 export async function getChargesForMember(memberId: string): Promise<Charge[]> {
   const admin = createSupabaseAdminClient();
@@ -31,12 +34,27 @@ export function balanceOf(charges: Pick<Charge, "amount_cents" | "paid_at">[]) {
     .reduce((sum, c) => sum + c.amount_cents, 0);
 }
 
-// Roster with each member's unpaid total, execs first then alphabetical.
+// email (lowercased) -> last_sign_in_at from auth.users. Paginates; the roster is small.
+async function getLastSignIns(admin: ReturnType<typeof createSupabaseAdminClient>) {
+  const map = new Map<string, string | null>();
+  for (let page = 1; page <= 10; page++) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
+    if (error) throw error;
+    for (const u of data.users) {
+      if (u.email) map.set(u.email.toLowerCase(), u.last_sign_in_at ?? null);
+    }
+    if (data.users.length < 200) break;
+  }
+  return map;
+}
+
+// Roster with each member's unpaid total and whether they've ever signed in.
 export async function getRosterWithBalances(): Promise<MemberWithBalance[]> {
   const admin = createSupabaseAdminClient();
-  const [membersRes, chargesRes] = await Promise.all([
+  const [membersRes, chargesRes, signIns] = await Promise.all([
     admin.from("members").select("id, email, name, role, active").order("name"),
     admin.from("charges").select("member_id, amount_cents").is("paid_at", null),
+    getLastSignIns(admin),
   ]);
   if (membersRes.error) throw membersRes.error;
   if (chargesRes.error) throw chargesRes.error;
@@ -49,6 +67,7 @@ export async function getRosterWithBalances(): Promise<MemberWithBalance[]> {
   return (membersRes.data as Member[]).map((m) => ({
     ...m,
     balance_cents: owed.get(m.id) ?? 0,
+    last_sign_in_at: signIns.get(m.email.toLowerCase()) ?? null,
   }));
 }
 

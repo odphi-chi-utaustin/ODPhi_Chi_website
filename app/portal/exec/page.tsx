@@ -31,6 +31,7 @@ export default async function ExecPage() {
         <p className="text-display mt-1">{formatCents(totalOwed)}</p>
         <p className="mt-1 text-sm text-muted-light">
           {roster.filter((m) => m.balance_cents > 0).length} of {actives.length} active members owe something.
+          {" "}{roster.filter((m) => !m.last_sign_in_at).length} on the roster have never signed in.
         </p>
       </div>
 
@@ -111,6 +112,7 @@ export default async function ExecPage() {
                 </div>
                 {m.role === "exec" && <Badge variant="exec">Exec</Badge>}
                 {!m.active && <Badge variant="alumni">Inactive</Badge>}
+                {!m.last_sign_in_at && <Badge variant="active-light">Never signed in</Badge>}
               </div>
               <div className="flex items-center gap-4 text-sm">
                 <span className={m.balance_cents > 0 ? "font-medium" : "text-muted-light"}>
