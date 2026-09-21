@@ -5,5 +5,5 @@ type ScarletRuleProps = {
 };
 
 export function ScarletRule({ className }: ScarletRuleProps) {
-  return <div className={cn("h-0.5 w-10 rounded bg-scarlet mb-3", className)} />;
+  return <div className={cn("mb-4 h-0.5 w-12 bg-scarlet", className)} />;
 }

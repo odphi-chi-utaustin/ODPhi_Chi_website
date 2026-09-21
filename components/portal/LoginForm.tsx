@@ -23,7 +23,7 @@ export function LoginForm() {
         required
         autoComplete="email"
         placeholder="you@utexas.edu"
-        className="rounded-md border border-border-light bg-white px-3 py-2 text-sm outline-none focus:border-scarlet"
+        className="h-11 border border-border-light bg-white px-3 text-sm outline-none focus:border-scarlet"
       />
       {state?.error && <p className="text-sm text-scarlet">{state.error}</p>}
       <Button type="submit" disabled={pending} className="disabled:opacity-60">

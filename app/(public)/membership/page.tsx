@@ -47,7 +47,7 @@ export default function MembershipPage() {
       <div className="mx-auto max-w-6xl px-6 py-12">
         <ScarletRule />
         <p className="text-eyebrow">Requirements</p>
-        <h2 className="text-heading mt-2 text-ink">
+        <h2 className="text-subheading mt-2 text-ink">
           Undergraduate Requirements
         </h2>
         <ul className="text-body mt-4 max-w-2xl list-disc space-y-2 pl-5 text-muted-light">
@@ -60,7 +60,7 @@ export default function MembershipPage() {
       <div className="mx-auto max-w-6xl border-t border-border-light px-6 py-12">
         <ScarletRule />
         <p className="text-eyebrow">Our Commitment</p>
-        <h2 className="text-heading mt-2 text-ink">Anti-Hazing Policy</h2>
+        <h2 className="text-subheading mt-2 text-ink">Anti-Hazing Policy</h2>
         <p className="text-body mt-4 max-w-2xl text-muted-light">
           Omega Delta Phi Fraternity, Inc. maintains a strict zero-tolerance
           policy against hazing in any form. All new members go through a
@@ -77,7 +77,7 @@ export default function MembershipPage() {
       <div className="mx-auto max-w-6xl border-t border-border-light px-6 py-12">
         <ScarletRule />
         <p className="text-eyebrow">Our Values</p>
-        <h2 className="text-heading mt-2 text-ink">Belonging and Inclusion</h2>
+        <h2 className="text-subheading mt-2 text-ink">Belonging and Inclusion</h2>
         <p className="text-body mt-4 max-w-2xl text-muted-light">
           Founded on the principle of one culture, any race, the Chi Chapter
           is committed to building a brotherhood where every member feels
@@ -88,7 +88,7 @@ export default function MembershipPage() {
       <div className="mx-auto max-w-6xl border-t border-border-light px-6 py-12">
         <ScarletRule />
         <p className="text-eyebrow">FAQ</p>
-        <h2 className="text-heading mt-2 text-ink">Parents FAQ</h2>
+        <h2 className="text-subheading mt-2 text-ink">Parents FAQ</h2>
         <div className="mt-6 max-w-2xl">
           <Accordion items={faqs} />
         </div>
@@ -97,7 +97,7 @@ export default function MembershipPage() {
       <div className="mx-auto max-w-6xl border-t border-border-light px-6 py-12 pb-20">
         <ScarletRule />
         <p className="text-eyebrow">Stay Connected</p>
-        <h2 className="text-heading mt-2 text-ink">Subscribe to our Newsletter</h2>
+        <h2 className="text-subheading mt-2 text-ink">Subscribe to our Newsletter</h2>
         <div className="mt-6 max-w-2xl">
           <NewsletterEmbed />
         </div>

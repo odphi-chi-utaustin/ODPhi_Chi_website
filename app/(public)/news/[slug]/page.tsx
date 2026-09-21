@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
+import { PhotoFrame } from "@/components/ui/PhotoFrame";
 import { mockNewsPosts, type MockNewsPost } from "@/lib/mock-data";
 
 const typeLabel: Record<MockNewsPost["type"], string> = {
@@ -25,14 +26,14 @@ export default async function NewsPostPage({
   }
 
   return (
-    <div className="bg-black min-h-screen">
+    <div className="bg-page-bg min-h-screen">
       <div className="mx-auto max-w-3xl px-6 pt-16 pb-20">
-        <div className="h-64 rounded-xl bg-elevated" />
-        <Badge variant="active-dark" className="mt-6">
+        <PhotoFrame src={null} alt={post.title} label="Photo" className="h-72 w-full" sizes="(min-width: 768px) 48rem, 100vw" />
+        <Badge variant="active-light" className="mt-6">
           {typeLabel[post.type]}
         </Badge>
-        <h1 className="text-display mt-4 text-white">{post.title}</h1>
-        <p className="text-label mt-3 text-muted">
+        <h1 className="text-display mt-4 text-ink">{post.title}</h1>
+        <p className="text-label mt-3 text-muted-light">
           {post.author} ·{" "}
           {new Date(post.publishedAt).toLocaleDateString("en-US", {
             month: "long",
@@ -40,7 +41,7 @@ export default async function NewsPostPage({
             year: "numeric",
           })}
         </p>
-        <p className="text-body mt-8 text-silver">{post.content}</p>
+        <p className="text-body mt-8 text-ink-soft">{post.content}</p>
       </div>
     </div>
   );

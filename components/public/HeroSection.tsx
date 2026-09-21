@@ -1,36 +1,41 @@
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
-import { ScarletRule } from "@/components/ui/ScarletRule";
+import { PhotoFrame } from "@/components/ui/PhotoFrame";
+import { photos } from "@/lib/photos";
 
 export function HeroSection() {
   return (
-    <section className="relative flex min-h-screen flex-col bg-black text-white">
-      <div className="absolute right-6 top-6">
-        <Badge variant="active-dark">Est. 1998 · X-Rated Chi Chapter</Badge>
+    <section className="relative flex min-h-[640px] flex-col justify-end text-white">
+      <div className="absolute inset-0">
+        <PhotoFrame
+          src={photos.hero}
+          alt="Brothers of the Chi Chapter on the UT Austin Main Mall"
+          label="Chapter photo — brothers on the Main Mall"
+          className="h-full w-full"
+          priority
+        />
       </div>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
 
-      <div className="mx-auto flex max-w-6xl flex-1 flex-col items-start justify-center px-6">
-        <p className="text-eyebrow">Omega Delta Phi Fraternity, Inc.</p>
-        <h1 className="text-display mt-4 max-w-2xl text-white">
-          One culture. <span className="text-scarlet">Any race.</span>
-        </h1>
-        <p className="text-body mt-6 max-w-md text-silver">
-          The Chi Chapter at the University of Texas at Austin — building
-          brotherhood, scholarship, and service across every background.
+      <div className="relative mx-auto w-full max-w-6xl px-6 pb-20 pt-40">
+        <p className="text-eyebrow text-rose">
+          Omega Delta Phi Fraternity, Inc. · Est. 1998
         </p>
-
-        <div className="mt-8 flex gap-4">
+        <h1 className="text-display mt-5 max-w-3xl">
+          One culture. Any race.
+          <br />A brotherhood since 1998.
+        </h1>
+        <p className="text-body mt-6 max-w-xl text-white/80">
+          The Chi Chapter at The University of Texas at Austin — leaders built
+          through scholarship, service, and unity.
+        </p>
+        <div className="mt-8 flex flex-wrap gap-4">
           <Button href="/membership" variant="primary">
-            Rush Info →
+            Rush Info
           </Button>
           <Button href="/about" variant="secondary-dark">
-            Meet the chapter
+            Our Story
           </Button>
         </div>
-      </div>
-
-      <div className="mx-auto w-full max-w-6xl px-6 pb-10">
-        <ScarletRule />
       </div>
     </section>
   );

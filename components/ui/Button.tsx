@@ -4,18 +4,16 @@ import { cn } from "@/lib/utils";
 type ButtonVariant = "primary" | "secondary-dark" | "secondary-light" | "ghost";
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary:
-    "bg-scarlet text-white hover:bg-scarlet-dark",
+  primary: "bg-scarlet text-white hover:bg-scarlet-dark",
   "secondary-dark":
-    "bg-transparent text-white border border-elevated hover:bg-elevated",
+    "bg-transparent text-white border border-white/60 hover:border-white hover:bg-white/10",
   "secondary-light":
-    "bg-white text-ink border border-border-light hover:bg-surface-light",
-  ghost:
-    "bg-transparent text-scarlet border border-scarlet hover:bg-scarlet-tint",
+    "bg-transparent text-scarlet border border-scarlet hover:bg-scarlet hover:text-white",
+  ghost: "bg-transparent text-scarlet hover:text-scarlet-dark px-0",
 };
 
 const baseClasses =
-  "inline-flex items-center justify-center rounded-md px-5 py-2.5 text-sm font-medium transition-colors";
+  "inline-flex h-12 items-center justify-center gap-2 px-6 text-[13px] font-semibold uppercase tracking-[0.14em] transition-colors";
 
 type ButtonProps = {
   variant?: ButtonVariant;

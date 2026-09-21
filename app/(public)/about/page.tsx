@@ -19,8 +19,8 @@ function Section({
     <div className="py-12">
       <ScarletRule />
       <p className="text-eyebrow">{eyebrow}</p>
-      <h2 className="text-heading mt-2 text-ink">{heading}</h2>
-      <div className="text-body mt-4 max-w-2xl text-muted-light">{children}</div>
+      <h2 className="text-subheading mt-2 text-ink">{heading}</h2>
+      <div className="text-body mt-4 max-w-2xl text-ink-soft">{children}</div>
     </div>
   );
 }
@@ -73,7 +73,7 @@ export default function AboutPage() {
       <div className="mx-auto max-w-6xl px-6 py-12">
         <ScarletRule />
         <p className="text-eyebrow">Leadership</p>
-        <h2 className="text-heading mt-2 text-ink">Executive Board</h2>
+        <h2 className="text-subheading mt-2 text-ink">Executive Board</h2>
         <div className="mt-8">
           <ExecBoardGrid members={mockExecBoard} variant="light" />
         </div>
@@ -82,7 +82,7 @@ export default function AboutPage() {
       <div className="mx-auto max-w-6xl px-6 py-12">
         <ScarletRule />
         <p className="text-eyebrow">Committees</p>
-        <h2 className="text-heading mt-2 text-ink">Semester Chairman</h2>
+        <h2 className="text-subheading mt-2 text-ink">Semester Chairman</h2>
         <ul className="mt-6 max-w-md divide-y divide-border-light">
           {mockCommittees.map((committee) => (
             <li
@@ -101,7 +101,7 @@ export default function AboutPage() {
       <div className="mx-auto max-w-6xl px-6 py-12 pb-20">
         <ScarletRule />
         <p className="text-eyebrow">Governance</p>
-        <h2 className="text-heading mt-2 text-ink">Constitution</h2>
+        <h2 className="text-subheading mt-2 text-ink">Constitution</h2>
         <p className="text-body mt-4 max-w-2xl text-muted-light">
           Read the chapter&apos;s governing constitution and bylaws.
         </p>

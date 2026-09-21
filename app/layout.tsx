@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { EB_Garamond, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 
-const inter = Inter({
-  variable: "--font-inter",
+const garamond = EB_Garamond({
+  variable: "--font-eb-garamond",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+});
+
+const sourceSans = Source_Sans_3({
+  variable: "--font-source-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -21,7 +28,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${garamond.variable} ${sourceSans.variable} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col">
         <Nav />
         <main className="flex-1">{children}</main>

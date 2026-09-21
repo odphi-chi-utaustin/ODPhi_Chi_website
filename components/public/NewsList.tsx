@@ -26,10 +26,10 @@ export function NewsList({ posts }: { posts: MockNewsPost[] }) {
             type="button"
             onClick={() => setActiveTab(tab.key)}
             className={cn(
-              "rounded-md px-4 py-2 text-sm font-medium transition-colors",
+              "h-11 px-4 text-[13px] font-semibold uppercase tracking-[0.14em] transition-colors",
               activeTab === tab.key
                 ? "bg-scarlet text-white"
-                : "border border-elevated text-muted hover:text-white"
+                : "border border-border-light text-muted-light hover:border-scarlet hover:text-scarlet"
             )}
           >
             {tab.label}
