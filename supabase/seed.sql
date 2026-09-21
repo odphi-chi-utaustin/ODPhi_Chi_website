@@ -3,6 +3,6 @@
 -- invited (Auth > Users > Invite, or the "Add member" form on /portal/exec which does both).
 
 insert into members (email, name, role) values
-  ('rojasdamiancarlos@gmail.com', 'Carlos Rojas', 'admin')
+  ('rojasdamiancarlos@gmail.com', 'Carlos Rojas', 'exec')
   -- ('brother@utexas.edu', 'First Last', 'member'),
 ;
