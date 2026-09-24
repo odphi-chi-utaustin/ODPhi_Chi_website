@@ -5,6 +5,8 @@ import { formatCents, formatDate } from "@/lib/portal/format";
 import { paymentInstructions } from "@/lib/portal/config";
 import { PayButtons } from "@/components/portal/PayButtons";
 import { passFeesToPayer } from "@/lib/portal/config";
+import { ActionForm, inputClass, labelClass } from "@/components/portal/ActionForm";
+import { setPassword } from "@/lib/portal/actions";
 
 export const metadata = { title: "My Dues | Chi Chapter" };
 
@@ -130,6 +132,27 @@ export default async function PortalPage({
           </Card>
         </section>
       )}
+
+      <section>
+        <h2 className="mb-3 text-lg font-medium">Password</h2>
+        <Card>
+          <p className="mb-4 text-sm text-muted-light">
+            Set a password to sign in without waiting for an email link.
+          </p>
+          <ActionForm action={setPassword} submitLabel="Save password">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="flex flex-col gap-1">
+                <label className={labelClass}>New password</label>
+                <input name="password" type="password" required minLength={8} autoComplete="new-password" className={inputClass} />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className={labelClass}>Confirm</label>
+                <input name="confirm" type="password" required minLength={8} autoComplete="new-password" className={inputClass} />
+              </div>
+            </div>
+          </ActionForm>
+        </Card>
+      </section>
     </div>
   );
 }

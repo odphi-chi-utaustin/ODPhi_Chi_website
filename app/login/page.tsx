@@ -14,7 +14,7 @@ export default async function LoginPage({
     <div className="mx-auto max-w-md px-6 py-16">
       <h1 className="text-2xl font-medium tracking-tight">Member Login</h1>
       <p className="mt-2 text-sm text-muted-light">
-        Enter the email on the chapter roster and we&apos;ll send you a sign-in link.
+        Sign in with your password, or enter the email on the chapter roster and we&apos;ll send you a sign-in link.
       </p>
       {error === "expired" && (
         <p className="mt-4 text-sm text-scarlet">

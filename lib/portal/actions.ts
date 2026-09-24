@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { requireExec, requireAdmin, type Member } from "@/lib/portal/auth";
+import { requireMember, requireExec, requireAdmin, type Member } from "@/lib/portal/auth";
 import { parseDollars } from "@/lib/portal/format";
 import { newChargeEmail, sendEmails } from "@/lib/portal/email";
 
@@ -73,6 +73,49 @@ export async function sendMagicLink(
     return { error: "Couldn't send a link right now. Try again in a minute." };
   }
   return { success: "If that email is on the roster, a sign-in link is on its way." };
+}
+
+export async function signInWithPassword(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const email = str(formData, "email").toLowerCase();
+  const password = String(formData.get("password") ?? "");
+  if (!email.includes("@")) return { error: "Enter your email address." };
+  if (!password) return { error: "Enter your password, or use a sign-in link instead." };
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) return { error: "Wrong email or password." };
+  redirect("/portal");
+}
+
+// One form, two buttons: the pressed button's `intent` picks the method.
+export async function signIn(
+  prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  return formData.get("intent") === "link"
+    ? sendMagicLink(prev, formData)
+    : signInWithPassword(prev, formData);
+}
+
+// Signed-in member sets or changes their own password.
+export async function setPassword(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireMember();
+  const password = String(formData.get("password") ?? "");
+  if (password.length < 8) return { error: "Use at least 8 characters." };
+  if (password !== String(formData.get("confirm") ?? "")) {
+    return { error: "Passwords don't match." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) return { error: error.message };
+  return { success: "Password saved. You can now sign in with it at /login." };
 }
 
 export async function signOut() {
@@ -171,8 +214,10 @@ export async function addMember(
   const email = str(formData, "email").toLowerCase();
   const name = str(formData, "name");
   const role = roleFrom(formData, me);
+  const password = String(formData.get("password") ?? "");
   if (!email.includes("@")) return { error: "Enter a valid email." };
   if (!name) return { error: "Enter a name." };
+  if (password && password.length < 8) return { error: "Temporary password needs at least 8 characters." };
 
   const admin = createSupabaseAdminClient();
   const { error } = await admin.from("members").insert({ email, name, role });
@@ -180,11 +225,13 @@ export async function addMember(
     return { error: error.code === "23505" ? "That email is already on the roster." : error.message };
   }
 
-  // Creates the auth.users row so the member can request a magic link from /login.
+  // Creates the auth.users row so the member can request a magic link from /login,
+  // or sign in with the optional temporary password.
   // No invite email: editing Supabase's templates requires custom SMTP.
   const { error: authErr } = await admin.auth.admin.createUser({
     email,
     email_confirm: true,
+    ...(password && { password }),
   });
   if (authErr && !/already been registered|already exists/i.test(authErr.message)) {
     return { error: `Added to roster, but login setup failed: ${authErr.message}` };

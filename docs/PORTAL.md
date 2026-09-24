@@ -71,8 +71,12 @@ trail of who changed what.
 
 ## Sign-in flow
 
-There are no passwords. A member types his email at `/login`, gets a one-time link, and clicking it
-signs him in.
+Two ways in, both on `/login`:
+
+- **Password** (`signInWithPassword`). Members set one from the "Password" card on `/portal`, or exec
+  can give a temporary one in the "Add member" form.
+- **Magic link.** A member types their email, gets a one-time link, and clicking it signs them in.
+  This is the fallback for anyone without a password.
 
 ```mermaid
 sequenceDiagram
