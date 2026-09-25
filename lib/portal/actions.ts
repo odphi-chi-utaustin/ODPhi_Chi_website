@@ -5,7 +5,16 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { requireMember, requireExec, requireAdmin, type Member } from "@/lib/portal/auth";
+import {
+  requireMember,
+  requireExec,
+  requireCharger,
+  requireRosterAdmin,
+  canEditMember,
+  grantableRoles,
+  type Member,
+  type Role,
+} from "@/lib/portal/auth";
 import { parseDollars } from "@/lib/portal/format";
 import { newChargeEmail, sendEmails } from "@/lib/portal/email";
 import { lockedMinutes, recordFailure, clearFailures } from "@/lib/portal/lockout";
@@ -16,12 +25,21 @@ function str(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
 }
 
-// Parses a role from a form, capped by what the caller is allowed to grant:
-// only admins can grant admin.
-function roleFrom(formData: FormData, by: Member): Member["role"] {
-  const r = str(formData, "role");
-  if (r === "admin") return by.role === "admin" ? "admin" : "exec";
-  return r === "exec" ? "exec" : "member";
+// Parses a role from a form, or null if the caller isn't allowed to grant it.
+function roleFrom(formData: FormData, by: Member): Role | null {
+  const r = str(formData, "role") || "member";
+  return grantableRoles(by).find((role) => role === r) ?? null;
+}
+
+// The target's roster row, if `by` is allowed to edit it.
+async function editableMember(by: Member, id: string) {
+  if (!id) return null;
+  const { data } = await createSupabaseAdminClient()
+    .from("members")
+    .select("id, email, name, role")
+    .eq("id", id)
+    .maybeSingle();
+  return data && canEditMember(by, data) ? (data as Pick<Member, "id" | "email" | "name" | "role">) : null;
 }
 
 async function siteUrl() {
@@ -136,13 +154,13 @@ export async function signOut() {
   redirect("/login");
 }
 
-// ---- exec: charges ----
+// ---- charges: exec / exec_admin ----
 
 export async function addCharge(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireExec();
+  await requireCharger();
   const member_id = str(formData, "member_id");
   const description = str(formData, "description");
   const amount_cents = parseDollars(str(formData, "amount"));
@@ -165,7 +183,7 @@ export async function chargeAllActives(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireExec();
+  await requireCharger();
   const description = str(formData, "description");
   const amount_cents = parseDollars(str(formData, "amount"));
   if (!description) return { error: "Add a description (e.g. “Fall 2026 dues”)." };
@@ -190,7 +208,7 @@ export async function chargeAllActives(
 }
 
 export async function markPaid(formData: FormData) {
-  await requireExec();
+  await requireCharger();
   const id = str(formData, "id");
   const admin = createSupabaseAdminClient();
   await admin
@@ -201,7 +219,7 @@ export async function markPaid(formData: FormData) {
 }
 
 export async function markUnpaid(formData: FormData) {
-  await requireExec();
+  await requireCharger();
   const id = str(formData, "id");
   const admin = createSupabaseAdminClient();
   await admin.from("charges").update({ paid_at: null }).eq("id", id);
@@ -209,14 +227,14 @@ export async function markUnpaid(formData: FormData) {
 }
 
 export async function deleteCharge(formData: FormData) {
-  await requireExec();
+  await requireCharger();
   const id = str(formData, "id");
   const admin = createSupabaseAdminClient();
   await admin.from("charges").delete().eq("id", id);
   revalidatePath("/portal", "layout");
 }
 
-// ---- exec: roster ----
+// ---- roster: exec (non-admins) / admin (everyone) ----
 
 export async function addMember(
   _prev: ActionState,
@@ -227,6 +245,7 @@ export async function addMember(
   const name = str(formData, "name");
   const role = roleFrom(formData, me);
   const password = String(formData.get("password") ?? "");
+  if (!role) return { error: "You can't grant that role." };
   if (!email.includes("@")) return { error: "Enter a valid email." };
   if (!name) return { error: "Enter a name." };
   if (password && password.length < 8) return { error: "Temporary password needs at least 8 characters." };
@@ -253,27 +272,22 @@ export async function addMember(
   return { success: `${name} added. Tell them to sign in at /login.` };
 }
 
-// Change a member's role. Nobody can change their own role, admins can only be
-// changed by admins, and only admins can grant admin.
+// Change a member's role. Nobody can change their own role; plain exec can only
+// move non-admins between member and exec.
 export async function setMemberRole(formData: FormData) {
   const me = await requireExec();
-  const id = str(formData, "id");
-  if (id === me.id) return;
   const role = roleFrom(formData, me);
+  const target = await editableMember(me, str(formData, "id"));
+  if (!role || !target) return;
 
-  const admin = createSupabaseAdminClient();
-  const { data: target } = await admin.from("members").select("role").eq("id", id).maybeSingle();
-  if (!target) return;
-  if (target.role === "admin" && me.role !== "admin") return;
-
-  await admin.from("members").update({ role }).eq("id", id);
+  await createSupabaseAdminClient().from("members").update({ role }).eq("id", target.id);
   revalidatePath("/portal", "layout");
 }
 
-// Admin only. Deletes the roster row (charges cascade) and the login, so the
+// Admin / exec_admin only. Deletes the roster row (charges cascade) and the login, so the
 // address can no longer request a magic link. Not reversible.
 export async function removeMember(formData: FormData) {
-  const me = await requireAdmin();
+  const me = await requireRosterAdmin();
   const id = str(formData, "id");
   if (!id || id === me.id) return;
 
@@ -290,7 +304,7 @@ export async function removeMember(formData: FormData) {
   revalidatePath("/portal", "layout");
 }
 
-// Exec sets a temporary password for someone already on the roster (no password
+// Exec/admin sets a temporary password for someone already on the roster (no password
 // yet, or forgot it). Creates their login if they were seeded without one, and
 // clears any lockout. Your own password is changed from /portal instead.
 export async function setMemberPassword(
@@ -304,16 +318,10 @@ export async function setMemberPassword(
   if (id === me.id) return { error: "Change your own password from the My Dues page." };
   if (password.length < 8) return { error: "Use at least 8 characters." };
 
+  const target = await editableMember(me, id);
+  if (!target) return { error: "You can't change that member's password." };
+
   const admin = createSupabaseAdminClient();
-  const { data: target } = await admin
-    .from("members")
-    .select("email, name, role")
-    .eq("id", id)
-    .maybeSingle();
-  if (!target) return { error: "That member isn't on the roster." };
-  if (target.role === "admin" && me.role !== "admin") {
-    return { error: "Only an admin can reset an admin's password." };
-  }
 
   const email = target.email.toLowerCase();
   const { data: users } = await admin.auth.admin.listUsers({ perPage: 1000 });
@@ -328,10 +336,11 @@ export async function setMemberPassword(
 }
 
 export async function setMemberActive(formData: FormData) {
-  await requireExec();
-  const id = str(formData, "id");
+  const me = await requireExec();
+  const target = await editableMember(me, str(formData, "id"));
+  if (!target) return;
   const active = str(formData, "active") === "true";
   const admin = createSupabaseAdminClient();
-  await admin.from("members").update({ active }).eq("id", id);
+  await admin.from("members").update({ active }).eq("id", target.id);
   revalidatePath("/portal", "layout");
 }

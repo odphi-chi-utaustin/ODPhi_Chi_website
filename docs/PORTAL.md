@@ -48,7 +48,7 @@ Two tables. A member's balance is the sum of his charges that have no `paid_at`.
 | `id` | uuid | primary key |
 | `email` | citext, unique | the login gate; matched case-insensitively against the Supabase auth user |
 | `name` | text | |
-| `role` | text | `member`, `exec`, or `admin` (admin = exec + remove members + grant admin) |
+| `role` | text | `member`, `exec`, `admin`, or `exec_admin`; see Roles below |
 | `active` | bool | `false` = inactive/alumni; excluded from bulk dues |
 | `created_at` | timestamptz | |
 
@@ -108,6 +108,19 @@ Three rules that follow from this:
 After sign-in, `getCurrentMember()` looks up the roster row by the auth user's email. If someone has a
 Supabase login but no `members` row, they are treated as logged out.
 
+## Roles
+
+| Role | Charges | Roster |
+| --- | --- | --- |
+| `member` | sees own only | none |
+| `exec` | create, mark paid, undo, delete | add members; change role (member ↔ exec), status, and password of non-admins. Can't touch admins, grant admin, or remove anyone |
+| `admin` | sees everything, changes nothing | everything: add, remove, any role, anyone's status and password |
+| `exec_admin` | same as exec | same as admin |
+
+Nobody can change their own role, status, or (from the roster) password. The rules live in
+`canCharge`, `isRosterAdmin`, `canEditMember`, and `grantableRoles` in `lib/portal/auth.ts`, and every
+action checks them server-side; the page only hides controls to match.
+
 ## Security model
 
 All authorization lives in one file, `lib/portal/auth.ts`, and the database refuses everything that
@@ -118,7 +131,7 @@ doesn't come through it.
 | Postgres RLS | Enabled on `members` and `charges` with **zero policies** | The public anon key can't read or write a single row, even if someone extracts it from the browser bundle |
 | Service role key | Used for every query, from server code only | Bypasses RLS, so it must never reach the browser. It lives in `SUPABASE_SERVICE_ROLE_KEY` (no `NEXT_PUBLIC_` prefix) and is imported only by `lib/supabase/admin.ts` |
 | `requireMember()` | First line of every portal page and action; redirects to `/login` if no roster row matches | Members can only ever see queries scoped to their own `member.id` |
-| `requireExec()` | First line of every exec page and mutating action; redirects to `/portal` unless role is `exec` or `admin` | A member can't call an exec server action by guessing its name; the check runs server-side inside the action |
+| `requireExec()` | First line of every exec page and mutating action; redirects to `/portal` unless role is `exec`, `admin`, or `exec_admin`. Charge actions use `requireCharger()`, removal uses `requireRosterAdmin()` | A member can't call an exec server action by guessing its name; the check runs server-side inside the action |
 | `proxy.ts` | Redirects logged-out users away from `/portal` before the page renders | Convenience and cookie refresh only; it is **not** the security boundary |
 
 Things a member cannot do, by construction: write to `charges`, see anyone else's charges, change
@@ -135,7 +148,7 @@ Four routes and nine server actions cover the whole portal.
 | `/login` | anyone | Email field; "check your inbox" after submit; expired-link notice |
 | `/auth/callback` | link click | No UI; exchanges the code for a session and redirects to `/portal` |
 | `/portal` | signed-in member | "You owe $X", outstanding charges, Venmo/Zelle instructions, paid history |
-| `/portal/exec` | exec | Total outstanding, charge-one form, charge-all form, outstanding list with mark paid/delete, roster with balances, add member, recently paid with undo |
+| `/portal/exec` | exec, admin | Total outstanding, charge-one form, charge-all form, outstanding list with mark paid/delete, roster with balances, add member, set a member's password, recently paid with undo. Charge controls only for exec roles |
 
 Every form posts to a server action in `lib/portal/actions.ts`. Actions run on Vercel, never in the
 browser, and each one starts with `requireExec()` (or nothing extra, for the two auth actions).
@@ -144,15 +157,16 @@ browser, and each one starts with `requireExec()` (or nothing extra, for the two
 | --- | --- | --- |
 | `sendMagicLink` | none | Sends the one-time link if the email has a login |
 | `signOut` | none | Clears the session, redirects to `/login` |
-| `addCharge` | exec | Inserts one charge for one member |
-| `chargeAllActives` | exec | Inserts one charge per member with `active = true` |
-| `markPaid` | exec | Sets `paid_at = now()` |
-| `markUnpaid` | exec | Sets `paid_at = null` (undo) |
-| `deleteCharge` | exec | Deletes the row |
+| `addCharge` | exec, exec_admin | Inserts one charge for one member |
+| `chargeAllActives` | exec, exec_admin | Inserts one charge per member with `active = true` |
+| `markPaid` | exec, exec_admin | Sets `paid_at = now()` |
+| `markUnpaid` | exec, exec_admin | Sets `paid_at = null` (undo) |
+| `deleteCharge` | exec, exec_admin | Deletes the row |
 | `addMember` | exec | Inserts roster row, creates the Supabase login |
-| `setMemberActive` | exec | Toggles `active` |
-| `setMemberRole` | exec | Changes a member's role; only admins can touch admins or grant admin |
-| `removeMember` | admin | Deletes the roster row, its charges, and the login |
+| `setMemberActive` | exec (non-admins), admin | Toggles `active` |
+| `setMemberRole` | exec (non-admins), admin | Changes a member's role; exec can only set member or exec |
+| `setMemberPassword` | exec (non-admins), admin | Sets a temporary password, creating the login if missing, and lifts a lockout |
+| `removeMember` | admin, exec_admin | Deletes the roster row, its charges, and the login |
 
 After any mutation the action calls `revalidatePath('/portal', 'layout')` so both portal pages
 re-render with fresh data on the next request.
@@ -185,7 +199,7 @@ The portal is about 15 files; the public site is untouched.
 | `lib/supabase/server.ts` | Anon-key client bound to request cookies; identifies the user |
 | `lib/supabase/admin.ts` | Service-role client; all data queries. Server only |
 | `lib/supabase/proxy.ts` | Cookie-refresh helper used by `proxy.ts` |
-| `lib/portal/auth.ts` | `getCurrentMember`, `requireMember`, `requireExec` |
+| `lib/portal/auth.ts` | `getCurrentMember`, role rules, `requireMember` / `requireExec` / `requireCharger` / `requireRosterAdmin` |
 | `lib/portal/queries.ts` | Read queries: charges for a member, roster with balances, all charges |
 | `lib/portal/actions.ts` | All server actions (the nine listed above) |
 | `lib/portal/format.ts` | Cents ↔ dollars, date formatting |

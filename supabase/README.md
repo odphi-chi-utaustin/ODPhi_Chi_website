@@ -3,7 +3,8 @@
 1. Create a project at supabase.com. Copy the URL, anon key, and service role key from
    **Project Settings → API** into `.env.local` (see `.env.example`) and into Vercel env vars.
 2. **SQL Editor** → run `schema.sql`, then `seed.sql` (edit the roster first), then
-   `004_login_attempts.sql` (password lockout).
+   `004_login_attempts.sql` (password lockout) and `005_split_roles.sql` (edit the email in it to
+   yours first; it makes you `exec_admin`).
 3. **Authentication → URL Configuration**: set Site URL to the production URL and add
    `http://localhost:3000/auth/callback` and `https://<prod>/auth/callback` to Redirect URLs.
 4. **Authentication → Users → Add user → Create new user**: enter your email (the exec row in

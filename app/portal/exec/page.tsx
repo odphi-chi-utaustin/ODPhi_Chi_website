@@ -2,7 +2,14 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { ActionForm, inputClass, labelClass } from "@/components/portal/ActionForm";
 import { ConfirmForm } from "@/components/portal/ConfirmForm";
-import { requireExec } from "@/lib/portal/auth";
+import {
+  requireExec,
+  canCharge,
+  isRosterAdmin,
+  canEditMember,
+  grantableRoles,
+  ROLE_LABELS,
+} from "@/lib/portal/auth";
 import { getRosterWithBalances, getAllCharges } from "@/lib/portal/queries";
 import { formatCents, formatDate } from "@/lib/portal/format";
 import {
@@ -22,7 +29,9 @@ export const metadata = { title: "Exec | Chi Chapter" };
 
 export default async function ExecPage() {
   const me = await requireExec();
-  const isAdmin = me.role === "admin";
+  const charger = canCharge(me);
+  const rosterAdmin = isRosterAdmin(me);
+  const roles = grantableRoles(me);
   const [roster, charges] = await Promise.all([getRosterWithBalances(), getAllCharges()]);
   const actives = roster.filter((m) => m.active);
   const totalOwed = roster.reduce((s, m) => s + m.balance_cents, 0);
@@ -40,6 +49,7 @@ export default async function ExecPage() {
         </p>
       </div>
 
+      {charger && (
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <h2 className="mb-4 text-lg font-medium">Charge one member</h2>
@@ -70,6 +80,7 @@ export default async function ExecPage() {
           </ActionForm>
         </Card>
       </div>
+      )}
 
       <section>
         <h2 className="mb-3 text-lg font-medium">Outstanding charges</h2>
@@ -90,14 +101,18 @@ export default async function ExecPage() {
                 </div>
                 <div className="flex items-center gap-4 text-sm">
                   <span className="font-medium">{formatCents(c.amount_cents)}</span>
-                  <form action={markPaid}>
-                    <input type="hidden" name="id" value={c.id} />
-                    <button type="submit" className="text-scarlet hover:underline">Mark paid</button>
-                  </form>
-                  <form action={deleteCharge}>
-                    <input type="hidden" name="id" value={c.id} />
-                    <button type="submit" className="text-muted-light hover:text-scarlet">Delete</button>
-                  </form>
+                  {charger && (
+                    <>
+                      <form action={markPaid}>
+                        <input type="hidden" name="id" value={c.id} />
+                        <button type="submit" className="text-scarlet hover:underline">Mark paid</button>
+                      </form>
+                      <form action={deleteCharge}>
+                        <input type="hidden" name="id" value={c.id} />
+                        <button type="submit" className="text-muted-light hover:text-scarlet">Delete</button>
+                      </form>
+                    </>
+                  )}
                 </div>
               </div>
             ))}
@@ -115,8 +130,7 @@ export default async function ExecPage() {
                   <p className="text-sm font-medium">{m.name}</p>
                   <p className="text-xs text-muted-light">{m.email}</p>
                 </div>
-                {m.role === "exec" && <Badge variant="exec">Exec</Badge>}
-                {m.role === "admin" && <Badge variant="exec">Admin</Badge>}
+                {m.role !== "member" && <Badge variant="exec">{ROLE_LABELS[m.role]}</Badge>}
                 {!m.active && <Badge variant="alumni">Inactive</Badge>}
                 {!m.last_sign_in_at && <Badge variant="active-light">Never signed in</Badge>}
               </div>
@@ -124,25 +138,27 @@ export default async function ExecPage() {
                 <span className={m.balance_cents > 0 ? "font-medium" : "text-muted-light"}>
                   {formatCents(m.balance_cents)}
                 </span>
-                {m.id !== me.id && (isAdmin || m.role !== "admin") && (
-                  <form action={setMemberRole} className="flex items-center gap-1">
-                    <input type="hidden" name="id" value={m.id} />
-                    <select name="role" defaultValue={m.role} className="h-8 border border-border-light bg-white px-2 text-xs">
-                      <option value="member">Member</option>
-                      <option value="exec">Exec</option>
-                      {isAdmin && <option value="admin">Admin</option>}
-                    </select>
-                    <button type="submit" className="text-muted-light hover:text-scarlet">Set role</button>
-                  </form>
+                {canEditMember(me, m) && (
+                  <>
+                    <form action={setMemberRole} className="flex items-center gap-1">
+                      <input type="hidden" name="id" value={m.id} />
+                      <select name="role" defaultValue={m.role} className="h-8 border border-border-light bg-white px-2 text-xs">
+                        {roles.map((r) => (
+                          <option key={r} value={r}>{ROLE_LABELS[r]}</option>
+                        ))}
+                      </select>
+                      <button type="submit" className="text-muted-light hover:text-scarlet">Set role</button>
+                    </form>
+                    <form action={setMemberActive}>
+                      <input type="hidden" name="id" value={m.id} />
+                      <input type="hidden" name="active" value={m.active ? "false" : "true"} />
+                      <button type="submit" className="text-muted-light hover:text-scarlet">
+                        {m.active ? "Deactivate" : "Reactivate"}
+                      </button>
+                    </form>
+                  </>
                 )}
-                <form action={setMemberActive}>
-                  <input type="hidden" name="id" value={m.id} />
-                  <input type="hidden" name="active" value={m.active ? "false" : "true"} />
-                  <button type="submit" className="text-muted-light hover:text-scarlet">
-                    {m.active ? "Deactivate" : "Reactivate"}
-                  </button>
-                </form>
-                {isAdmin && m.id !== me.id && (
+                {rosterAdmin && m.id !== me.id && (
                   <ConfirmForm
                     action={removeMember}
                     message={`Remove ${m.name} from the roster? This deletes their charges and login. It can't be undone.`}
@@ -171,9 +187,9 @@ export default async function ExecPage() {
               <div className="flex flex-col gap-1">
                 <label className={labelClass}>Role</label>
                 <select name="role" defaultValue="member" className={inputClass}>
-                  <option value="member">Member</option>
-                  <option value="exec">Exec</option>
-                  {isAdmin && <option value="admin">Admin</option>}
+                  {roles.map((r) => (
+                    <option key={r} value={r}>{ROLE_LABELS[r]}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -199,7 +215,7 @@ export default async function ExecPage() {
                 <select name="member_id" required className={inputClass} defaultValue="">
                   <option value="" disabled>Select…</option>
                   {roster
-                    .filter((m) => m.id !== me.id && (isAdmin || m.role !== "admin"))
+                    .filter((m) => canEditMember(me, m))
                     .map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.name}{m.active ? "" : " (inactive)"}
@@ -228,10 +244,12 @@ export default async function ExecPage() {
                 </div>
                 <div className="flex items-center gap-4 text-sm">
                   <span>{formatCents(c.amount_cents)}</span>
-                  <form action={markUnpaid}>
-                    <input type="hidden" name="id" value={c.id} />
-                    <button type="submit" className="hover:text-scarlet">Undo</button>
-                  </form>
+                  {charger && (
+                    <form action={markUnpaid}>
+                      <input type="hidden" name="id" value={c.id} />
+                      <button type="submit" className="hover:text-scarlet">Undo</button>
+                    </form>
+                  )}
                 </div>
               </div>
             ))}
