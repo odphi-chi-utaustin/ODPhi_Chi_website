@@ -290,6 +290,43 @@ export async function removeMember(formData: FormData) {
   revalidatePath("/portal", "layout");
 }
 
+// Exec sets a temporary password for someone already on the roster (no password
+// yet, or forgot it). Creates their login if they were seeded without one, and
+// clears any lockout. Your own password is changed from /portal instead.
+export async function setMemberPassword(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const me = await requireExec();
+  const id = str(formData, "member_id");
+  const password = String(formData.get("password") ?? "");
+  if (!id) return { error: "Pick a member." };
+  if (id === me.id) return { error: "Change your own password from the My Dues page." };
+  if (password.length < 8) return { error: "Use at least 8 characters." };
+
+  const admin = createSupabaseAdminClient();
+  const { data: target } = await admin
+    .from("members")
+    .select("email, name, role")
+    .eq("id", id)
+    .maybeSingle();
+  if (!target) return { error: "That member isn't on the roster." };
+  if (target.role === "admin" && me.role !== "admin") {
+    return { error: "Only an admin can reset an admin's password." };
+  }
+
+  const email = target.email.toLowerCase();
+  const { data: users } = await admin.auth.admin.listUsers({ perPage: 1000 });
+  const authUser = users?.users.find((u) => u.email?.toLowerCase() === email);
+  const { error } = authUser
+    ? await admin.auth.admin.updateUserById(authUser.id, { password })
+    : await admin.auth.admin.createUser({ email, password, email_confirm: true });
+  if (error) return { error: error.message };
+
+  await clearFailures(email);
+  return { success: `Password set for ${target.name}. Send it to them privately.` };
+}
+
 export async function setMemberActive(formData: FormData) {
   await requireExec();
   const id = str(formData, "id");

@@ -74,7 +74,8 @@ trail of who changed what.
 Two ways in, both on `/login`:
 
 - **Password** (`signInWithPassword`). Members set one from the "Password" card on `/portal`, or exec
-  can give a temporary one in the "Add member" form.
+  can give a temporary one in the "Add member" form or, for someone already on the roster, the
+  "Set a member's password" form (which also lifts a lockout).
 - **Magic link.** A member types their email, gets a one-time link, and clicking it signs them in.
   This is the fallback for anyone without a password.
 

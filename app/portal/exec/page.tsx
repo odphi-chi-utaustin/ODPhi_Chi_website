@@ -15,6 +15,7 @@ import {
   setMemberActive,
   setMemberRole,
   removeMember,
+  setMemberPassword,
 } from "@/lib/portal/actions";
 
 export const metadata = { title: "Exec | Chi Chapter" };
@@ -182,6 +183,34 @@ export default async function ExecPage() {
               <p className="text-xs text-muted-light">
                 Lets them sign in without the email link. They can change it from their dues page.
               </p>
+            </div>
+          </ActionForm>
+        </Card>
+
+        <Card className="mt-4">
+          <h3 className="mb-4 text-base font-medium">Set a member&apos;s password</h3>
+          <p className="mb-4 text-sm text-muted-light">
+            For members with no password yet, or who forgot theirs. Also lifts a lockout.
+          </p>
+          <ActionForm action={setMemberPassword} submitLabel="Set password">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="flex flex-col gap-1">
+                <label className={labelClass}>Member</label>
+                <select name="member_id" required className={inputClass} defaultValue="">
+                  <option value="" disabled>Select…</option>
+                  {roster
+                    .filter((m) => m.id !== me.id && (isAdmin || m.role !== "admin"))
+                    .map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name}{m.active ? "" : " (inactive)"}
+                      </option>
+                    ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className={labelClass}>Temporary password</label>
+                <input name="password" type="password" required autoComplete="new-password" minLength={8} className={inputClass} />
+              </div>
             </div>
           </ActionForm>
         </Card>
