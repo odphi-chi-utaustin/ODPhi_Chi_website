@@ -8,6 +8,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { requireMember, requireExec, requireAdmin, type Member } from "@/lib/portal/auth";
 import { parseDollars } from "@/lib/portal/format";
 import { newChargeEmail, sendEmails } from "@/lib/portal/email";
+import { lockedMinutes, recordFailure, clearFailures } from "@/lib/portal/lockout";
 
 export type ActionState = { error?: string; success?: string } | undefined;
 
@@ -84,9 +85,20 @@ export async function signInWithPassword(
   if (!email.includes("@")) return { error: "Enter your email address." };
   if (!password) return { error: "Enter your password, or use a sign-in link instead." };
 
+  const minutes = await lockedMinutes(email);
+  if (minutes) {
+    return {
+      error: `Too many wrong passwords. Try again in ${minutes} minute${minutes === 1 ? "" : "s"}, or use an email link.`,
+    };
+  }
+
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { error: "Wrong email or password." };
+  if (error) {
+    await recordFailure(email);
+    return { error: "Wrong email or password." };
+  }
+  await clearFailures(email);
   redirect("/portal");
 }
 

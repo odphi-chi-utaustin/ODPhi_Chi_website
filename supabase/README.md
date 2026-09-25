@@ -2,19 +2,23 @@
 
 1. Create a project at supabase.com. Copy the URL, anon key, and service role key from
    **Project Settings → API** into `.env.local` (see `.env.example`) and into Vercel env vars.
-2. **SQL Editor** → run `schema.sql`, then `seed.sql` (edit the roster first).
+2. **SQL Editor** → run `schema.sql`, then `seed.sql` (edit the roster first), then
+   `004_login_attempts.sql` (password lockout).
 3. **Authentication → URL Configuration**: set Site URL to the production URL and add
    `http://localhost:3000/auth/callback` and `https://<prod>/auth/callback` to Redirect URLs.
 4. **Authentication → Users → Add user → Create new user**: enter your email (the exec row in
-   `seed.sql`), tick **Auto Confirm User**, and set any password (it's never used). Don't use
+   `seed.sql`), tick **Auto Confirm User**, and set a password (at least 8 characters) to sign in with. Don't use
    "Send invitation" — editing invite/magic-link templates requires custom SMTP, so the app skips
    invite emails entirely.
-5. Go to `/login`, request a link, open it **on the same device**. After that, add everyone else
+5. **Authentication → Providers → Email**: set minimum password length to 8.
+6. Go to `/login` and sign in with that password. After that, add everyone else
    through the "Add member" form on `/portal/exec`, which creates the roster row and the login in
-   one step; they then sign themselves in at `/login`.
+   one step (give a temporary password there so they don't depend on the email link); they then
+   sign themselves in at `/login`.
 
 Sign-in links must be opened on the device that requested them (PKCE). The login page says so if a
-link fails.
+link fails. Five wrong passwords lock password sign-in for that email for 15 minutes; email links
+still work while locked.
 
 # Stripe setup (one-time, after the chapter account exists)
 

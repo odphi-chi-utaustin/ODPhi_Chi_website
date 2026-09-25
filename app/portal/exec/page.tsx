@@ -178,7 +178,7 @@ export default async function ExecPage() {
             </div>
             <div className="flex flex-col gap-1">
               <label className={labelClass}>Temporary password (optional)</label>
-              <input name="password" type="text" autoComplete="off" minLength={8} className={inputClass} />
+              <input name="password" type="password" autoComplete="new-password" minLength={8} className={inputClass} />
               <p className="text-xs text-muted-light">
                 Lets them sign in without the email link. They can change it from their dues page.
               </p>
