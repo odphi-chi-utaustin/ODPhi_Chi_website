@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { NewsCard } from "@/components/public/NewsCard";
-import type { MockNewsPost } from "@/lib/mock-data";
+import type { NewsPost, NewsType } from "@/lib/news";
 
-const tabs: { key: "all" | MockNewsPost["type"]; label: string }[] = [
+const tabs: { key: "all" | NewsType; label: string }[] = [
   { key: "all", label: "All" },
   { key: "spotlight", label: "Alumni Spotlights" },
   { key: "newsletter", label: "Newsletters" },
 ];
 
-export function NewsList({ posts }: { posts: MockNewsPost[] }) {
+export function NewsList({ posts }: { posts: NewsPost[] }) {
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["key"]>("all");
 
   const filtered =

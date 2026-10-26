@@ -5,8 +5,12 @@ import { PhotoFrame } from "@/components/ui/PhotoFrame";
 import { HeroSection } from "@/components/public/HeroSection";
 import { ExecBoardGrid } from "@/components/public/ExecBoardGrid";
 import { NewsCard } from "@/components/public/NewsCard";
-import { mockExecBoard, mockNewsPosts } from "@/lib/mock-data";
+import { mockExecBoard } from "@/lib/mock-data";
+import { getPublishedPosts } from "@/lib/news";
 import { photos } from "@/lib/photos";
+
+// Edits revalidate on save; this is a backstop if a fetch failed at build time.
+export const revalidate = 3600;
 
 const stats = [
   { value: "1998", label: "Chartered at Texas" },
@@ -33,7 +37,8 @@ const pillars = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const latestPosts = await getPublishedPosts(3);
   return (
     <>
       <HeroSection />
@@ -134,11 +139,11 @@ export default function HomePage() {
               All news <span aria-hidden="true">→</span>
             </Button>
           </div>
-          {mockNewsPosts.length === 0 ? (
+          {latestPosts.length === 0 ? (
             <p className="mt-8 text-muted-light">No posts yet. Check back soon.</p>
           ) : (
             <div className="mt-8 grid gap-6 md:grid-cols-3">
-              {mockNewsPosts.slice(0, 3).map((post) => (
+              {latestPosts.map((post) => (
                 <NewsCard key={post.slug} post={post} />
               ))}
             </div>

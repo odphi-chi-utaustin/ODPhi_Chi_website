@@ -5,6 +5,7 @@
 2. **SQL Editor** → run `schema.sql`, then `seed.sql` (edit the roster first), then
    `004_login_attempts.sql` (password lockout) and `005_split_roles.sql` (edit the email in it to
    yours first; it makes you `exec_admin`).
+   Then `006_news.sql`: the news posts table plus a public `news-images` storage bucket for photos.
 3. **Authentication → URL Configuration**: set Site URL to the production URL and add
    `http://localhost:3000/auth/callback` and `https://<prod>/auth/callback` to Redirect URLs.
 4. **Authentication → Users → Add user → Create new user**: enter your email (the exec row in

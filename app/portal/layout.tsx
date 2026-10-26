@@ -17,9 +17,14 @@ export default async function PortalLayout({
             My Dues
           </Link>
           {isExec(member) && (
-            <Link href="/portal/exec" className="font-medium hover:text-scarlet">
-              Exec
-            </Link>
+            <>
+              <Link href="/portal/exec" className="font-medium hover:text-scarlet">
+                Exec
+              </Link>
+              <Link href="/portal/news" className="font-medium hover:text-scarlet">
+                News
+              </Link>
+            </>
           )}
         </div>
         <div className="flex items-center gap-4 text-sm text-muted-light">

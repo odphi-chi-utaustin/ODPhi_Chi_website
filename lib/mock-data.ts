@@ -28,15 +28,3 @@ export const mockCommittees: MockCommittee[] = [
 ];
 
 export const mockConstitutionUrl = "#";
-
-export type MockNewsPost = {
-  slug: string;
-  type: "spotlight" | "newsletter" | "general";
-  title: string;
-  excerpt: string;
-  content: string;
-  author: string;
-  publishedAt: string;
-};
-
-export const mockNewsPosts: MockNewsPost[] = [];

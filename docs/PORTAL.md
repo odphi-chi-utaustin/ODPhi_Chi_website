@@ -6,7 +6,7 @@ As of 2026-09-20. Living copy: https://claude.ai/code/artifact/a198e89b-c3b9-4d6
 
 The portal lets a brother sign in and see what he owes the chapter, and lets exec assign charges and
 mark them paid. It lives at `/portal` on the chapter site; the public pages (home, about, membership,
-news) are untouched and still fully static.
+news) are static, cached pages; news posts come from the database and are edited at `/portal/news`.
 
 Scope is deliberately small: one balance per member, one list of charges, no online payment. Members
 pay the treasurer by Venmo or Zelle and exec records it.
@@ -30,9 +30,9 @@ for every query. That split is what makes the security model simple (see Securit
 
 | Piece | Where it runs | What it does |
 | --- | --- | --- |
-| Public pages | Vercel, static | Home, about, membership, news. No database, no auth |
+| Public pages | Vercel, static | Home, about, membership, news. No auth; home and news read published posts and refresh when one is saved |
 | `proxy.ts` | Vercel, every `/portal`, `/login`, `/auth` request | Refreshes the session cookie; redirects logged-out users to `/login` |
-| Portal pages | Vercel, server-rendered per request | `/login`, `/portal`, `/portal/exec` |
+| Portal pages | Vercel, server-rendered per request | `/login`, `/portal`, `/portal/exec`, `/portal/news` |
 | Server actions | Vercel, on form submit | Send link, add charge, mark paid, add member, etc. |
 | Supabase Auth | Supabase | Stores logins, sends magic-link emails, validates them |
 | Supabase Postgres | Supabase | Two tables: `members` and `charges` |
