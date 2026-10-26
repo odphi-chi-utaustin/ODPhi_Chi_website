@@ -134,11 +134,15 @@ export default function HomePage() {
               All news <span aria-hidden="true">→</span>
             </Button>
           </div>
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
-            {mockNewsPosts.slice(0, 3).map((post) => (
-              <NewsCard key={post.slug} post={post} />
-            ))}
-          </div>
+          {mockNewsPosts.length === 0 ? (
+            <p className="mt-8 text-muted-light">No posts yet. Check back soon.</p>
+          ) : (
+            <div className="mt-8 grid gap-6 md:grid-cols-3">
+              {mockNewsPosts.slice(0, 3).map((post) => (
+                <NewsCard key={post.slug} post={post} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

@@ -37,11 +37,15 @@ export function NewsList({ posts }: { posts: MockNewsPost[] }) {
         ))}
       </div>
 
-      <div className="mt-8 grid gap-6 md:grid-cols-3">
-        {filtered.map((post) => (
-          <NewsCard key={post.slug} post={post} />
-        ))}
-      </div>
+      {filtered.length === 0 ? (
+        <p className="mt-8 text-muted-light">No posts yet. Check back soon.</p>
+      ) : (
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
+          {filtered.map((post) => (
+            <NewsCard key={post.slug} post={post} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
