@@ -5,6 +5,8 @@ import { PhotoFrame } from "@/components/ui/PhotoFrame";
 import { HeroSection } from "@/components/public/HeroSection";
 import { ExecBoardGrid } from "@/components/public/ExecBoardGrid";
 import { NewsCard } from "@/components/public/NewsCard";
+import { InstagramFeed } from "@/components/public/InstagramFeed";
+import { instagramPosts, instagramProfileUrl } from "@/lib/instagram";
 import { mockExecBoard } from "@/lib/mock-data";
 import { getPublishedPosts } from "@/lib/news";
 import { photos } from "@/lib/photos";
@@ -148,6 +150,27 @@ export default async function HomePage() {
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Instagram */}
+      <section className="bg-page-bg">
+        <div className="mx-auto max-w-6xl px-6 pt-20">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="text-eyebrow">Follow Along</p>
+              <h2 className="text-heading mt-3 text-ink">@texasodphi</h2>
+            </div>
+            <a
+              href={instagramProfileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-12 items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.14em] text-scarlet transition-colors hover:text-scarlet-dark"
+            >
+              Follow on Instagram <span aria-hidden="true">→</span>
+            </a>
+          </div>
+          {instagramPosts.length > 0 && <InstagramFeed posts={instagramPosts} />}
         </div>
       </section>
 
