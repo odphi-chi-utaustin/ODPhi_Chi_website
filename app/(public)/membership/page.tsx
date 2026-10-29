@@ -1,6 +1,6 @@
 import { ScarletRule } from "@/components/ui/ScarletRule";
 import { Accordion } from "@/components/ui/Accordion";
-import { NewsletterEmbed } from "@/components/public/NewsletterEmbed";
+import { NewsletterSignup } from "@/components/public/NewsletterSignup";
 
 export const metadata = {
   title: "Membership | Chi Chapter",
@@ -32,7 +32,7 @@ const faqs = [
   {
     question: "Who can I contact with concerns?",
     answer:
-      "Parents and guardians can reach out to our chapter advisor or any exec board member listed on the About page.",
+      "Parents and guardians can send a message through our Contact page, or reach out to any exec board member listed on the About page.",
   },
 ];
 
@@ -99,7 +99,7 @@ export default function MembershipPage() {
         <p className="text-eyebrow">Stay Connected</p>
         <h2 className="text-subheading mt-2 text-ink">Subscribe to our Newsletter</h2>
         <div className="mt-6 max-w-2xl">
-          <NewsletterEmbed />
+          <NewsletterSignup source="membership" />
         </div>
       </div>
     </div>

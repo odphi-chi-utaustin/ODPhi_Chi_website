@@ -6,6 +6,9 @@
    `004_login_attempts.sql` (password lockout) and `005_split_roles.sql` (edit the email in it to
    yours first; it makes you `exec_admin`).
    Then `006_news.sql`: the news posts table plus a public `news-images` storage bucket for photos.
+   Then `007_inquiries.sql`: submissions from the Contact, Update Your Information, and
+   Recruitment Recommendations forms, read at `/portal/inbox`.
+   Then `008_newsletter.sql`: the newsletter mailing list and sent issues (`/portal/newsletter`).
 3. **Authentication → URL Configuration**: set Site URL to the production URL and add
    `http://localhost:3000/auth/callback` and `https://<prod>/auth/callback` to Redirect URLs.
 4. **Authentication → Users → Add user → Create new user**: enter your email (the exec row in
@@ -41,6 +44,10 @@ still work while locked.
 5. Local dev: `stripe listen --forward-to localhost:3000/api/stripe/webhook` prints a `whsec_…` for
    `.env.local`. Test card `4242 4242 4242 4242`; test ACH uses Stripe's test bank in Checkout.
 
+The `/give` donation form uses the same key (Checkout's submit button reads "Donate"). Gifts show up in
+the Stripe dashboard only; nothing is written to the database. Without the key, `/give` says online
+giving is coming soon.
+
 The Pay buttons only render when `STRIPE_SECRET_KEY` is set, so the portal works without Stripe.
 Exec still marks Venmo/Zelle payments by hand; Stripe is just another way `paid_at` gets set.
 
@@ -56,5 +63,9 @@ Nothing sends until `RESEND_API_KEY` is set.
 3. Set `CRON_SECRET` in Vercel to any long random string. Vercel's cron (see `vercel.json`) sends it
    as a Bearer token; the route rejects anything else. Hobby plan crons run once a day at most, so
    the weekly schedule is fine.
-4. To test the reminder by hand:
+4. The newsletter (`/portal/newsletter`) sends through the same key. Sending to the list needs the
+   verified domain from step 2; until then only "Send test to me" works, and only for the Resend
+   account owner. The free plan allows 100 emails a day and 3,000 a month, so a list over 100 needs
+   a paid plan. Each email carries its own unsubscribe link plus one-click unsubscribe headers.
+5. To test the reminder by hand:
    `curl -H "Authorization: Bearer $CRON_SECRET" https://<vercel-url>/api/cron/reminders`

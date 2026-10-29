@@ -24,6 +24,12 @@ export default async function PortalLayout({
               <Link href="/portal/news" className="font-medium hover:text-scarlet">
                 News
               </Link>
+              <Link href="/portal/newsletter" className="font-medium hover:text-scarlet">
+                Newsletter
+              </Link>
+              <Link href="/portal/inbox" className="font-medium hover:text-scarlet">
+                Inbox
+              </Link>
             </>
           )}
         </div>

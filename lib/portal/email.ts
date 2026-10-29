@@ -77,7 +77,15 @@ export function reminderEmail(
   };
 }
 
-type Message = ReturnType<typeof newChargeEmail>;
+export type Message = {
+  from: string;
+  to: string;
+  subject: string;
+  text: string;
+  html?: string;
+  replyTo?: string;
+  headers?: Record<string, string>;
+};
 
 export async function sendEmails(messages: Message[]): Promise<number> {
   const resend = client();

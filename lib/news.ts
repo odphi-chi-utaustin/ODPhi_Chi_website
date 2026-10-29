@@ -75,3 +75,32 @@ export async function getPost(id: string): Promise<NewsPost | null> {
 export function paragraphs(content: string) {
   return content.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
 }
+
+export function slugify(title: string) {
+  return (
+    title
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60) || "post"
+  );
+}
+
+// First of `base`, `base-2`, `base-3`, … not already taken.
+export async function uniqueSlug(base: string) {
+  const { data } = await createSupabaseAdminClient()
+    .from("news_posts")
+    .select("slug")
+    .like("slug", `${base}%`);
+  const taken = new Set((data ?? []).map((r) => r.slug));
+  let slug = base;
+  for (let n = 2; taken.has(slug); n++) slug = `${base}-${n}`;
+  return slug;
+}
+
+export function excerptFrom(content: string) {
+  const first = paragraphs(content)[0] ?? "";
+  return first.length > 180 ? `${first.slice(0, 177).trimEnd()}…` : first;
+}

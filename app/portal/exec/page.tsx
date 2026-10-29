@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { ActionForm, inputClass, labelClass } from "@/components/portal/ActionForm";
+import { ActionForm } from "@/components/portal/ActionForm";
+import { inputClass, labelClass } from "@/components/ui/form-styles";
 import { ConfirmForm } from "@/components/portal/ConfirmForm";
 import {
   requireExec,

@@ -1,4 +1,5 @@
-import { ActionForm, inputClass, labelClass } from "@/components/portal/ActionForm";
+import { ActionForm } from "@/components/portal/ActionForm";
+import { inputClass, labelClass } from "@/components/ui/form-styles";
 import { savePost } from "@/lib/portal/news-actions";
 import { NEWS_TYPE_LABELS, type NewsPost, type NewsType } from "@/lib/news";
 

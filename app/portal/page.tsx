@@ -5,7 +5,8 @@ import { formatCents, formatDate } from "@/lib/portal/format";
 import { paymentInstructions } from "@/lib/portal/config";
 import { PayButtons } from "@/components/portal/PayButtons";
 import { passFeesToPayer } from "@/lib/portal/config";
-import { ActionForm, inputClass, labelClass } from "@/components/portal/ActionForm";
+import { ActionForm } from "@/components/portal/ActionForm";
+import { inputClass, labelClass } from "@/components/ui/form-styles";
 import { setPassword } from "@/lib/portal/actions";
 
 export const metadata = { title: "My Dues | Chi Chapter" };

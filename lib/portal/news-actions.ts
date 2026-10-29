@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { requireExec } from "@/lib/portal/auth";
-import { paragraphs, NEWS_TYPE_LABELS, type NewsType } from "@/lib/news";
+import { NEWS_TYPE_LABELS, slugify, uniqueSlug, excerptFrom, type NewsType } from "@/lib/news";
 import type { ActionState } from "@/lib/portal/actions";
 
 const BUCKET = "news-images";
@@ -13,35 +13,6 @@ const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 
 function str(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
-}
-
-function slugify(title: string) {
-  return (
-    title
-      .toLowerCase()
-      .normalize("NFKD")
-      .replace(/[̀-ͯ]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 60) || "post"
-  );
-}
-
-// First of `base`, `base-2`, `base-3`, … not already taken.
-async function uniqueSlug(base: string) {
-  const { data } = await createSupabaseAdminClient()
-    .from("news_posts")
-    .select("slug")
-    .like("slug", `${base}%`);
-  const taken = new Set((data ?? []).map((r) => r.slug));
-  let slug = base;
-  for (let n = 2; taken.has(slug); n++) slug = `${base}-${n}`;
-  return slug;
-}
-
-function excerptFrom(content: string) {
-  const first = paragraphs(content)[0] ?? "";
-  return first.length > 180 ? `${first.slice(0, 177).trimEnd()}…` : first;
 }
 
 // Storage path from a public URL we issued, so replaced photos can be cleaned up.

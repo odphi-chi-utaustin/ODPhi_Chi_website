@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { ScarletRule } from "@/components/ui/ScarletRule";
+import { Card } from "@/components/ui/Card";
 import { ExecBoardGrid } from "@/components/public/ExecBoardGrid";
 import { mockExecBoard, mockCommittees, mockConstitutionUrl } from "@/lib/mock-data";
 
@@ -42,6 +44,12 @@ export default function AboutPage() {
             fraternities on campus, rooted in the founding pillars of
             unity, honesty, integrity, and leadership.
           </p>
+          <Link
+            href="/about/history"
+            className="mt-4 inline-block text-sm font-medium text-scarlet hover:text-scarlet-dark"
+          >
+            Read the full history →
+          </Link>
         </Section>
 
         <Section eyebrow="Our Chapter" heading="Our Chapter">
@@ -79,23 +87,27 @@ export default function AboutPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-6 py-12">
+      <div id="committees" className="mx-auto max-w-6xl scroll-mt-24 px-6 py-12">
         <ScarletRule />
         <p className="text-eyebrow">Committees</p>
-        <h2 className="text-subheading mt-2 text-ink">Semester Chairman</h2>
-        <ul className="mt-6 max-w-md divide-y divide-border-light">
+        <h2 className="text-subheading mt-2 text-ink">Our Committees</h2>
+        <p className="text-body mt-4 max-w-2xl text-muted-light">
+          Most of the chapter&apos;s work happens in committees, each led by a
+          semester chairman.
+        </p>
+        <div className="mt-8 grid gap-5 sm:grid-cols-2">
           {mockCommittees.map((committee) => (
-            <li
-              key={committee.id}
-              className="flex items-center justify-between py-3"
-            >
-              <span className="text-body text-ink">{committee.name}</span>
-              <span className="text-label text-muted-light">
-                {committee.chair}
-              </span>
-            </li>
+            <Card key={committee.id} variant="pillar" className="p-6">
+              <p className="font-serif text-[22px] text-ink">{committee.name}</p>
+              <p className="text-label mt-1 text-muted-light">
+                Chair · {committee.chair}
+              </p>
+              <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
+                {committee.description}
+              </p>
+            </Card>
           ))}
-        </ul>
+        </div>
       </div>
 
       <div className="mx-auto max-w-6xl px-6 py-12 pb-20">

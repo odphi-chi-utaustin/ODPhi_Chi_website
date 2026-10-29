@@ -18,13 +18,38 @@ export type MockCommittee = {
   id: string;
   name: string;
   chair: string;
+  description: string;
 };
 
 export const mockCommittees: MockCommittee[] = [
-  { id: "1", name: "Recruitment Committee", chair: "Erick Torres" },
-  { id: "2", name: "Service Committee", chair: "Rafael Medina" },
-  { id: "3", name: "Academics Committee", chair: "Rafael Medina" },
-  { id: "4", name: "Social Committee", chair: "Fernando Nunez" },
+  {
+    id: "1",
+    name: "Recruitment Committee",
+    chair: "Erick Torres",
+    description:
+      "Plans fall and spring rush, meets potential new members, and follows up on recommendations from alumni and families.",
+  },
+  {
+    id: "2",
+    name: "Service Committee",
+    chair: "Rafael Medina",
+    description:
+      "Runs Young Knights mentorship, organizes philanthropy events, and tracks the chapter's community service hours.",
+  },
+  {
+    id: "3",
+    name: "Academics Committee",
+    chair: "Rafael Medina",
+    description:
+      "Sets the chapter's GPA goals, runs study hours and peer tutoring, and checks in with brothers who need support.",
+  },
+  {
+    id: "4",
+    name: "Social Committee",
+    chair: "Fernando Nunez",
+    description:
+      "Plans brotherhood events, mixers, and Founders Week, and brings actives and alumni together throughout the year.",
+  },
 ];
 
 export const mockConstitutionUrl = "#";
